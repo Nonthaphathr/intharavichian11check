@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบตรวจทานอินทรวิเชียรฉันท์ ๑๑ (V3.1 Enhanced Split)</title>
+    <title>ระบบตรวจทานอินทรวิเชียรฉันท์ ๑๑ (V3.1 Enhanced Split + Reporter)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -77,6 +77,22 @@
         #summaryText {
             font-family: 'Sarabun', monospace;
             white-space: pre-wrap;
+        }
+        
+        /* Floating Button & Modal */
+        .floating-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 50;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .floating-btn:hover {
+            transform: scale(1.1);
+        }
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
         }
     </style>
 </head>
@@ -187,8 +203,127 @@
             </div>
         </div>
     </div>
+    
+    <button onclick="openReportModal()" class="floating-btn bg-red-500 hover:bg-red-600 text-white rounded-full p-4 shadow-xl flex items-center gap-2 group">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <span class="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 whitespace-nowrap text-sm font-bold">
+            แจ้งคำที่ระบบไม่ตัด
+        </span>
+    </button>
+
+    <div id="reportModal" class="fixed inset-0 hidden items-center justify-center z-50 modal-backdrop opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md m-4 transform scale-95 transition-transform duration-300" id="modalContent">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                    <span class="bg-red-100 text-red-600 p-1.5 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                    </span>
+                    แจ้งเพิ่มคำศัพท์ใหม่
+                </h3>
+                <button onclick="closeReportModal()" class="text-gray-400 hover:text-gray-600 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <p class="text-sm text-gray-500 mb-4">ระบบจะบันทึกคำศัพท์ที่คุณแจ้ง เพื่อนำไปเพิ่มในโค้ดให้ระบบฉลาดขึ้น</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">คำศัพท์เต็ม (ติดกัน)</label>
+                    <input type="text" id="reportWord" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400 focus:outline-none" placeholder="เช่น กตัญญู">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">คำอ่านแยกพยางค์ (เว้นวรรค)</label>
+                    <input type="text" id="reportSplit" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400 focus:outline-none" placeholder="เช่น ก ตัญ ญู">
+                    <p class="text-xs text-gray-400 mt-1">ให้เว้นวรรคระหว่างพยางค์ที่ต้องการให้ตัด</p>
+                </div>
+                
+                <button onclick="submitReport()" id="btnSubmitReport" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg shadow-md transition flex justify-center items-center gap-2">
+                    บันทึกข้อมูล
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script>
+        // ==========================================
+        // 0. CONFIG & REPORT SYSTEM
+        // ==========================================
+        
+        // ⚠️⚠️ วาง URL ของ Google Apps Script Web App ที่ได้จากการ Deploy ที่นี่ ⚠️⚠️
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxLzE68y1uVVdkhiYfp5qswWbGE9QIYJsIhDhgDTa8LCPhvfEuPGwev589NgBooOjC_/exec'; 
+
+        function openReportModal() {
+            const modal = document.getElementById('reportModal');
+            const content = document.getElementById('modalContent');
+            modal.classList.remove('hidden');
+            // Small timeout to allow removing 'hidden' before applying opacity transition
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeReportModal() {
+            const modal = document.getElementById('reportModal');
+            const content = document.getElementById('modalContent');
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function submitReport() {
+            if (GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_SCRIPT_WEB_APP_URL_HERE') {
+                alert("กรุณาติดตั้ง Google Apps Script และใส่ URL ในโค้ดก่อนครับ");
+                return;
+            }
+
+            const word = document.getElementById('reportWord').value.trim();
+            const split = document.getElementById('reportSplit').value.trim();
+            const btn = document.getElementById('btnSubmitReport');
+
+            if (!word || !split) return alert("กรุณากรอกข้อมูลให้ครบครับ");
+
+            // UI Loading state
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> กำลังบันทึก...`;
+            btn.disabled = true;
+
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ word: word, split: split })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    document.getElementById('reportWord').value = '';
+                    document.getElementById('reportSplit').value = '';
+                    closeReportModal();
+                } else {
+                    alert('เกิดข้อผิดพลาด: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('เชื่อมต่อไม่สำเร็จ กรุณาลองใหม่');
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        }
+
         // ==========================================
         // 1. CORE LOGIC (Updated V3.0 Strict Vowels)
         // ==========================================
@@ -453,7 +588,7 @@
             "จินดา": ["จิน", "ดา"], "พสุธา": ["พ", "สุ", "ธา"], "อัสดง": ["อัส", "ดง"],
             "วิธีกา": ["วิ", "ธี", "กา"], "เทคโนโลยี": ["เทค", "โน", "โล", "ยี"], "อันตราย": ["อัน", "ต", "ราย"],
             "เดชะ": ["เด", "ชะ"], "วิสัย": ["วิ", "สัย"], "อุบัติ": ["อุ", "บัติ"], "กตัญญู": ["ก", "ตัญ", "ญู"],
-            "กติกา": ["ก", "ติ", "กา"], "กวี": ["ก", "วี"], "กรณี": ["ก", "ร", "ณี"], "ทฤษฎี": ["ทฤ","ษ", "ฎี"], "สกาว": ["ส","กาว"] , "ทินกร": ["ทิน","น","กร"]
+            "กติกา": ["ก", "ติ", "กา"], "กวี": ["ก", "วี"], "กรณี": ["ก", "ร", "ณี"], "ทฤษฎี": ["ทฤษ", "ฎี"], "สกาว": ["ส","กาว"] , "ทินกร": ["ทิน","น","กร"]
         };
 
         function tokenizeLine(lineText) {
