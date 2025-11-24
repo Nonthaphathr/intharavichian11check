@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบตรวจทานอินทรวิเชียรฉันท์ ๑๑ (V3.1 Enhanced Split + Reporter)</title>
+    <title>ระบบตรวจทานอินทรวิเชียรฉันท์ ๑๑ (V3.2 Final + Reporter)</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&family=Prompt:wght@300;400;500;600;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Prompt', 'Sarabun', sans-serif; background-color: #f0f4f8; }
         .kru-bg { background-color: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
@@ -79,19 +79,21 @@
             white-space: pre-wrap;
         }
         
-        /* Floating Button & Modal */
+        /* Floating Button & Modal Styles */
         .floating-btn {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            bottom: 30px; 
+            right: 30px;
             z-index: 50;
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4); /* เงาสีส้ม */
         }
         .floating-btn:hover {
-            transform: scale(1.1);
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 6px 20px rgba(249, 115, 22, 0.6);
         }
         .modal-backdrop {
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(4px);
         }
     </style>
@@ -117,7 +119,7 @@
         <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-100">
             <label class="block text-gray-700 font-bold mb-2 flex flex-col md:flex-row md:items-center justify-between gap-2">
                 <span class="flex items-center gap-2 text-lg">📝 วางบทประพันธ์ (แยกบรรทัดให้ชัดเจน)</span>
-                <span class="text-xs font-normal text-gray-500 bg-gray-100 px-3 py-1 rounded-full">V3.1 (Enhanced Split)</span>
+                <span class="text-xs font-normal text-gray-500 bg-gray-100 px-3 py-1 rounded-full">V3.2 Final</span>
             </label>
             
             <textarea id="poemInput" rows="6" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition placeholder-gray-400 font-medium" placeholder="วางอินทรวิเชียรฉันท์ ๑๑ ของท่านทีนี่
@@ -204,48 +206,61 @@
         </div>
     </div>
     
-    <button onclick="openReportModal()" class="floating-btn bg-red-500 hover:bg-red-600 text-white rounded-full p-4 shadow-xl flex items-center gap-2 group">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+    <button onclick="openReportModal()" class="floating-btn bg-orange-500 hover:bg-orange-600 text-gray-900 rounded-full px-6 py-4 flex items-center gap-3 border-2 border-orange-400">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
         </svg>
-        <span class="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 whitespace-nowrap text-sm font-bold">
-            แจ้งคำที่ระบบไม่ตัด
+        <span class="text-sm font-extrabold tracking-wide">
+            แจ้งคำที่ระบบรวบคำ(ไม่แยกพยางค์)
         </span>
     </button>
 
     <div id="reportModal" class="fixed inset-0 hidden items-center justify-center z-50 modal-backdrop opacity-0 transition-opacity duration-300">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md m-4 transform scale-95 transition-transform duration-300" id="modalContent">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-                    <span class="bg-red-100 text-red-600 p-1.5 rounded-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                    </span>
-                    แจ้งเพิ่มคำศัพท์ใหม่
-                </h3>
-                <button onclick="closeReportModal()" class="text-gray-400 hover:text-gray-600 transition">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg m-4 transform scale-95 transition-transform duration-300 relative" id="modalContent">
+            
+            <div class="flex justify-between items-start mb-4 border-b border-gray-100 pb-3">
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                        <span class="bg-orange-100 text-orange-600 p-1.5 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                        </span>
+                        แจ้งคำที่ระบบอ่านรวบคำ
+                    </h3>
+                    <p class="text-xs text-gray-500 mt-1">ช่วยแจ้งคำที่ระบบควรอ่านแยกพยางค์ (ลหุ) แต่อ่านรวบเป็นพยางค์เดียว</p>
+                </div>
+                <button onclick="closeReportModal()" class="text-gray-400 hover:text-gray-600 transition p-1 hover:bg-gray-100 rounded-full">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
             
-            <p class="text-sm text-gray-500 mb-4">ระบบจะบันทึกคำศัพท์ที่คุณแจ้ง เพื่อนำไปเพิ่มในโค้ดให้ระบบฉลาดขึ้น</p>
+            <div class="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-5 text-sm text-blue-800">
+                <p class="font-bold mb-1">💡 ตัวอย่างการกรอกข้อมูล:</p>
+                <ul class="list-disc ml-4 space-y-1 text-blue-700">
+                    <li>ถ้าเจอคำว่า <b>"สบาย"</b> ระบบอ่านว่า <b>"สบาย" (1 คำ)</b> ซึ่งผิด</li>
+                    <li>ต้องแจ้งให้ระบบทราบว่า ควรอ่านเป็น <b>"ส บาย" (2 คำ)</b></li>
+                </ul>
+            </div>
             
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">คำศัพท์เต็ม (ติดกัน)</label>
-                    <input type="text" id="reportWord" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400 focus:outline-none" placeholder="เช่น กตัญญู">
+                    <label class="block text-sm font-bold text-gray-700 mb-1">1. คำศัพท์เต็ม (เขียนติดกัน)</label>
+                    <input type="text" id="reportWord" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-orange-200 focus:border-orange-400 focus:outline-none transition font-medium" placeholder="เช่น สบาย">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">คำอ่านแยกพยางค์ (เว้นวรรค)</label>
-                    <input type="text" id="reportSplit" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400 focus:outline-none" placeholder="เช่น ก ตัญ ญู">
-                    <p class="text-xs text-gray-400 mt-1">ให้เว้นวรรคระหว่างพยางค์ที่ต้องการให้ตัด</p>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">2. คำที่แยกพยางค์แล้ว (เคาะวรรคตรงจุดที่แยก)</label>
+                    <input type="text" id="reportSplit" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-orange-200 focus:border-orange-400 focus:outline-none transition font-medium" placeholder="เช่น ส บาย">
+                    <p class="text-xs text-orange-600 mt-1">* สำคัญ: อย่าลืมเคาะเว้นวรรคระหว่างพยางค์</p>
                 </div>
                 
-                <button onclick="submitReport()" id="btnSubmitReport" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg shadow-md transition flex justify-center items-center gap-2">
-                    บันทึกข้อมูล
+                <button onclick="submitReport()" id="btnSubmitReport" class="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold py-3 rounded-xl shadow-lg transform hover:-translate-y-0.5 transition flex justify-center items-center gap-2 mt-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    ส่งข้อมูลให้ผู้พัฒนา
                 </button>
             </div>
         </div>
@@ -263,7 +278,6 @@
             const modal = document.getElementById('reportModal');
             const content = document.getElementById('modalContent');
             modal.classList.remove('hidden');
-            // Small timeout to allow removing 'hidden' before applying opacity transition
             setTimeout(() => {
                 modal.classList.remove('opacity-0');
                 content.classList.remove('scale-95');
@@ -325,7 +339,7 @@
         }
 
         // ==========================================
-        // 1. CORE LOGIC (Updated V3.0 Strict Vowels)
+        // 1. CORE LOGIC (Updated V3.2)
         // ==========================================
 
         function processLeadingConsonants(word) {
@@ -354,7 +368,6 @@
         }
 
         function getVowelSound(word) {
-            // 1. Check complex vowels first
             if (hasAiVowel(word)) return 'ไอ';
             if (word.includes('เอีย')) return 'เอีย';
             if (word.includes('เอือ')) return 'เอือ';
@@ -385,15 +398,13 @@
             if (word.includes('อิ')) return 'อิ';
             if (word.includes('อะ') || word.includes('ะ') || word.includes('ั')) return 'อะ';
             
-            // 2. Specific Vowel Form Checks (Strict)
             if (word.includes('เ')) return 'เอ'; 
             if (word.includes('โ')) return 'โอ';
             
-            // 3. Implicit Vowels (No visible vowel marks)
             const vowels = /[ะาิีึืุูเแโใไำั]/;
-            if (!word.match(vowels)) return 'โอะ'; // No visible vowel -> Sara Oh (Short)
+            if (!word.match(vowels)) return 'โอะ'; 
 
-            return 'อา'; // Fallback
+            return 'อา'; 
         }
 
         function getVowelAndFinalSound(word) {
@@ -401,7 +412,6 @@
             const cleanWord = word.replace(/[่้๊๋์]/g, '');
             const processedWord = processLeadingConsonants(cleanWord);
             
-            // Ror Han Logic
             if (/รร[ถตษสศดจชฎฏฐฑฒทธ]$/.test(processedWord)) return { vowel: 'อะ', finalGroup: 'กด' };
             if (/รร[คกขฆ]$/.test(processedWord)) return { vowel: 'อะ', finalGroup: 'กก' };
             if (/รร[พภบปฟ]$/.test(processedWord)) return { vowel: 'อะ', finalGroup: 'กบ' };
@@ -429,22 +439,22 @@
             return false;
         }
 
-        // --- isLahu Logic (UPDATED V3.1) ---
+        // --- isLahu Logic (UPDATED V3.2 - Supports Single Consonants) ---
         function isLahu(word) {
             if (!word) return false;
             word = word.trim();
             const cleanWord = word.replace(/[่้๊๋์]/g, '');
             const processedWord = processLeadingConsonants(cleanWord);
             
-            // 1. คำยกเว้น (Explicit Lahu)
+            // 1. Explicit Lahu
             const specialLahu = ["ก็", "บ่", "ณ", "ธ", "จะ", "ทิ", "ปิ", "ยะ", "สิ", "ธุ", "ระ", "พะ", "มิ", "ดุ", "เตะ", "กะ", "นิ", "ผลิ", "ลุ", "ฤ", "อิ", "ติ", "อุ", "หิ"];
             if (specialLahu.includes(word)) return true;
 
-            // 2. Ends with 'ะ' or 'เอาะ' -> Lahu
+            // 2. Ends with 'ะ' or 'เอาะ'
             if (processedWord.endsWith("ะ") || processedWord.includes("เอาะ")) return true;
 
-            // 3. *** NEW *** พยัญชนะตัวเดียว (ไม่มีสระ) จากการตัดคำแบบ Manual Split (เช่น "ส" ใน อิ-ส-ระ)
-            // เช็คว่ามีความยาว 1 และไม่มีรูปสระวรรณยุกต์ -> นับเป็นเสียงอะกึ่งเสียง (ลหุ)
+            // 3. *** PURE CONSONANT CHECK (for manual splits like "ส") ***
+            // If length 1, no vowel marks, no tones, no ending consonant logic -> Lahu (e.g. ส, ป, ก)
             const allVowelsAndTones = /[ะาิีึืุูเแโใไำั่้๊๋์]/;
             if (word.length === 1 && !allVowelsAndTones.test(word) && !hasEndingConsonant(word)) {
                 return true;
@@ -480,7 +490,7 @@
             return sound1.vowel === sound2.vowel && sound1.finalGroup === sound2.finalGroup;
         }
 
-        // --- 2. TOKENIZER (Expanded Dictionary V3.1) ---
+        // --- 2. TOKENIZER (Expanded Dictionary V3.2) ---
         
         const MANUAL_SPLITS = {
             // --- คำทั่วไป / คำสัมผัส / คำเชื่อม ---
@@ -605,7 +615,6 @@
                     return;
                 }
 
-                // Akson Nam + Mai Han Akat (C1 C2 ั C3)
                 if (word.length === 4 && word.charAt(2) === 'ั') {
                     const c1 = word.charAt(0);
                     const c2 = word.charAt(1);
@@ -727,8 +736,6 @@
             let extraWordCount = 0;
             let samphusPassCount = 0;
             let samphusFailCount = 0;
-            
-            // เก็บรายละเอียดข้อผิดพลาด
             let errorDetailsList = []; 
             
             poem.forEach((verse, vIndex) => {
@@ -874,7 +881,7 @@
             finalSummary += `[${samphusFailCount===0 ? '/' : ' '}] สัมผัสบังคับ: ${samphusFailCount===0 ? 'ถูกต้องทั้งหมด' : 'พบจุดผิด ' + samphusFailCount + ' จุด'}\n`;
             finalSummary += rhymeSummaryText;
             finalSummary += "--------------------------------\n";
-            finalSummary += "(ตรวจสอบโดย ระบบตรวจทานอินทรวิเชียรฉันท์ V3.1 พัฒนาโดย ครูนนทพัทธ์ หิรัญเรือง)";
+            finalSummary += "(ตรวจสอบโดย ระบบตรวจทานอินทรวิเชียรฉันท์ V3.2 พัฒนาโดย ครูนนทพัทธ์ หิรัญเรือง)";
             
             summaryTextBox.textContent = finalSummary;
             
