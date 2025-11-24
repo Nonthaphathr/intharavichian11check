@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบตรวจทานอินทรวิเชียรฉันท์ ๑๑ (V2.5 Line-by-Line)</title>
+    <title>ระบบตรวจทานอินทรวิเชียรฉันท์ ๑๑ (V2.6 Corrected Vowels)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -43,7 +43,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             z-index: 10;
         }
-        .badge-error { background-color: #ef4444; } /* แดง (แก้) */
+        .badge-error { background-color: #ef4444; } 
         
         .extra-word {
             display: inline-block;
@@ -79,7 +79,7 @@
         <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-100">
             <label class="block text-gray-700 font-bold mb-2 flex flex-col md:flex-row md:items-center justify-between gap-2">
                 <span class="flex items-center gap-2">✍️ วางบทประพันธ์ (แยกบรรทัดให้ชัดเจน)</span>
-                <span class="text-xs font-normal text-gray-500 bg-gray-100 px-3 py-1 rounded-full">ระบบตรวจทีละบรรทัด (Line-by-Line)</span>
+                <span class="text-xs font-normal text-gray-500 bg-gray-100 px-3 py-1 rounded-full">V2.6 (แก้กฎสระเกิน อำ/ไอ/ใอ/เอา = ครุ)</span>
             </label>
             
             <textarea id="poemInput" rows="6" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition" placeholder="วางบทประพันธ์ที่นี่...&#10;กลิ่นหอมบ่มีเลือน&#10;ผิเจือระเหยใจ&#10;ดวงจิตจักตรองไป&#10;บ่มิพรากจากปอง"></textarea>
@@ -93,7 +93,7 @@
                 <div class="flex-grow">
                     <h4 class="font-bold text-gray-800 text-sm mb-2">💡 คำแนะนำ: หากระบบนับพยางค์ผิด (รวบคำ)</h4>
                     <p class="text-sm text-gray-600 mb-3">
-                        หากมีคำศัพท์เฉพาะหรือชื่อคนที่ระบบรวบเป็น 1 คำ ให้ท่าน <b>"เคาะวรรค"</b> ตรงกลางคำนั้น เพื่อบังคับให้ระบบแยกพยางค์
+                        หากมีคำศัพท์เฉพาะที่ระบบรวบเป็น 1 คำ ให้ท่าน <b>"เคาะวรรค"</b> ตรงกลางคำนั้น เพื่อบังคับให้ระบบแยกพยางค์
                     </p>
                     <div class="bg-white border border-gray-200 rounded-lg p-3 text-sm flex flex-wrap gap-4 items-center">
                         <div class="text-red-500 flex items-center gap-2">
@@ -132,12 +132,10 @@
                     <h4 class="font-bold text-gray-700 mb-2">ผังบังคับ (ครุ-ลหุ)</h4>
                     <div id="kruLahuSummary"></div>
                 </div>
-
                 <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
                     <h4 class="font-bold text-gray-700 mb-2">จำนวนคำ (ขาด/เกิน)</h4>
                     <div id="wordCountSummary"></div>
                 </div>
-
                 <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
                     <h4 class="font-bold text-gray-700 mb-2">สัมผัสบังคับ</h4>
                     <div id="samphusSummary" class="text-sm space-y-2"></div>
@@ -151,9 +149,9 @@
     </div>
 
     <script>
-        // ============================================
-        // 1. HELPER FUNCTIONS (Logic เดิมทั้งหมด)
-        // ============================================
+        // ----------------------------------------------------
+        // 1. HELPER FUNCTIONS
+        // ----------------------------------------------------
 
         function processLeadingConsonants(word) {
             const anamYWords = ['อย่า', 'อยู่', 'อย่าง', 'อยาก'];
@@ -202,33 +200,6 @@
             return { vowel: getVowelSound(processedWord), finalGroup: getFinalConsonantGroup(processedWord) };
         }
 
-        function isLahu(word) {
-            if (!word) return false;
-            word = word.trim();
-            const cleanWord = word.replace(/[่้๊๋์]/g, '');
-            const processedWord = processLeadingConsonants(cleanWord);
-            
-            const specialLahu = ["ก็", "บ่", "ณ", "ธ", "จะ", "ทิ", "ปิ", "ยะ", "สิ", "ธุ", "ระ", "พะ", "มิ", "ดุ", "เตะ", "กะ", "นิ", "ผลิ", "ลุ"];
-            if (specialLahu.includes(word)) return true;
-
-            if (processedWord.includes("อำ") || processedWord.includes("ไอ") || processedWord.includes("ใอ") || processedWord.includes("เอา")) return false;
-            if (hasEndingConsonant(word)) return false;
-
-            const forceKruLongVowels = ["า", "ี", "ื", "ู", "เ", "แ", "โ", "อ"];
-            const shorteners = ["ะ", "็"];
-            
-            let hasLongVowel = false;
-            for (let v of forceKruLongVowels) if (processedWord.includes(v)) hasLongVowel = true;
-
-            if (hasLongVowel) {
-                let isShortened = false;
-                for (let s of shorteners) if (processedWord.includes(s)) isShortened = true;
-                if (processedWord.includes("เอาะ") || processedWord.includes("เออะ") || processedWord.includes("อัวะ") || processedWord.includes("เอียะ")) isShortened = true;
-                if (!isShortened) return false;
-            }
-            return true; 
-        }
-
         function hasEndingConsonant(word) {
             const cleanWord = word.replace(/[่้๊๋์]/g, '');
             const processedWord = processLeadingConsonants(cleanWord);
@@ -242,6 +213,46 @@
             return false;
         }
 
+        // --- ⭐ UPDATED isLahu Logic (V2.6) ⭐ ---
+        function isLahu(word) {
+            if (!word) return false;
+            word = word.trim();
+            const cleanWord = word.replace(/[่้๊๋์]/g, '');
+            const processedWord = processLeadingConsonants(cleanWord);
+            
+            // 1. คำยกเว้นที่เป็นลหุ
+            const specialLahu = ["ก็", "บ่", "ณ", "ธ", "จะ", "ทิ", "ปิ", "ยะ", "สิ", "ธุ", "ระ", "พะ", "มิ", "ดุ", "เตะ", "กะ", "นิ", "ผลิ", "ลุ", "ฤ"];
+            if (specialLahu.includes(word)) return true;
+
+            // 2. ⚠️ กฎสระเกิน (อำ, ไอ, ใอ, เอา) -> ถือเป็น "ครุ" (return false)
+            // เช็คที่ตัวสระโดยตรง: ำ, ไ, ใ
+            if (processedWord.includes("ำ") || processedWord.includes("ไ") || processedWord.includes("ใ")) return false; 
+            
+            // เช็คสระเอา (เ...า)
+            if (processedWord.includes("เ") && processedWord.includes("า")) return false;
+
+            // 3. มีตัวสะกด -> ครุ
+            if (hasEndingConsonant(word)) return false;
+
+            // 4. สระเสียงยาว -> ครุ
+            const forceKruLongVowels = ["า", "ี", "ื", "ู", "เ", "แ", "โ", "อ"];
+            let hasLongVowel = false;
+            for (let v of forceKruLongVowels) if (processedWord.includes(v)) hasLongVowel = true;
+
+            if (hasLongVowel) {
+                // เช็คว่ามีสระสั้นมาผสมให้เสียงสั้นลงไหม
+                const shorteners = ["ะ", "็"];
+                let isShortened = false;
+                for (let s of shorteners) if (processedWord.includes(s)) isShortened = true;
+                if (processedWord.includes("เอาะ") || processedWord.includes("เออะ") || processedWord.includes("อัวะ") || processedWord.includes("เอียะ")) isShortened = true;
+                
+                if (!isShortened) return false; // เป็นครุ (เสียงยาวแท้)
+            }
+
+            // ถ้าไม่เข้าเกณฑ์ครุข้างบนเลย ให้ถือว่าเป็น ลหุ
+            return true; 
+        }
+
         function checkSamphus(word1, word2) {
             if (!word1 || !word2) return false;
             const sound1 = getVowelAndFinalSound(word1);
@@ -249,9 +260,9 @@
             return sound1.vowel === sound2.vowel && sound1.finalGroup === sound2.finalGroup;
         }
 
-        // ============================================
+        // ----------------------------------------------------
         // 2. TOKENIZER
-        // ============================================
+        // ----------------------------------------------------
         
         const MANUAL_SPLITS = {
             "คิดถึง": ["คิด", "ถึง"], "หัวใจ": ["หัว", "ใจ"], "เสียใจ": ["เสีย", "ใจ"], "ดีใจ": ["ดี", "ใจ"],
@@ -333,9 +344,9 @@
             return finalSyllables;
         }
 
-        // ============================================
-        // 3. MAIN APP LOGIC (Line-by-Line)
-        // ============================================
+        // ----------------------------------------------------
+        // 3. MAIN LOGIC (Line-by-Line)
+        // ----------------------------------------------------
 
         const PATTERN_STANZA = [
             ['K', 'K', 'L', 'K', 'K'],          
