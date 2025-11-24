@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบตรวจทานอินทรวิเชียรฉันท์ ๑๑ (V2.7 Final Polish)</title>
+    <title>ระบบตรวจทานอินทรวิเชียรฉันท์ ๑๑ (V2.8 Final)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -58,18 +58,23 @@
         .logo-shadow { filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
 
         /* Button Animation */
-        @keyframes pulse-ring {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); transform: scale(1); }
+            50% { box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); transform: scale(1.02); }
+            100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); transform: scale(1); }
         }
         .btn-animate {
-            animation: pulse-ring 2s infinite;
+            animation: pulse-glow 3s infinite;
         }
         .btn-animate:hover {
             animation: none;
-            transform: scale(1.05);
-            transition: transform 0.2s ease;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        #summaryText {
+            font-family: 'Sarabun', monospace;
+            white-space: pre-wrap;
         }
     </style>
 </head>
@@ -78,13 +83,13 @@
     <div class="container max-w-4xl mx-auto p-4 flex-grow">
         
         <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 text-center border border-gray-100 relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 to-purple-600"></div>
             <div class="flex flex-col md:flex-row items-center justify-center gap-6 mb-4">
                 <img src="https://img5.pic.in.th/file/secure-sv1/logo-vichakarngo-6.png" alt="Logo" class="w-32 h-auto rounded-lg logo-shadow object-contain">
                 <div class="text-left">
                     <h1 class="text-2xl md:text-3xl font-bold text-gray-800">ระบบตรวจทานอินทรวิเชียรฉันท์ ๑๑</h1>
                     <p class="text-gray-500 mt-1">ตรวจสอบความถูกต้องของฉันทลักษณ์ (ครุ-ลหุ) และการสัมผัส</p>
-                    <div class="mt-2 inline-block bg-indigo-50 text-indigo-600 text-xs px-3 py-1 rounded-full border border-indigo-100 font-medium">
+                    <div class="mt-2 inline-block bg-purple-50 text-purple-700 text-xs px-3 py-1 rounded-full border border-purple-100 font-medium">
                         พัฒนาโดย ครูนนทพัทธ์ หิรัญเรือง
                     </div>
                 </div>
@@ -94,47 +99,42 @@
         <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-100">
             <label class="block text-gray-700 font-bold mb-2 flex flex-col md:flex-row md:items-center justify-between gap-2">
                 <span class="flex items-center gap-2 text-lg">📝 วางบทประพันธ์ (แยกบรรทัดให้ชัดเจน)</span>
-                <span class="text-xs font-normal text-gray-500 bg-gray-100 px-3 py-1 rounded-full">ระบบตรวจทีละบรรทัด (Line-by-Line)</span>
+                <span class="text-xs font-normal text-gray-500 bg-gray-100 px-3 py-1 rounded-full">V2.8 (แก้สระอิ/สกัด/สลัด)</span>
             </label>
             
-            <textarea id="poemInput" rows="6" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition placeholder-gray-400" placeholder="วางอินทรวิเชียรฉันท์ ๑๑ ของท่านทีนี่  
-ตัวอย่าง : 
-ยามเพื่อนสบายใจ               
-จะสนุกให้ระรื่นชู
-เมื่อมิตรสิหดหู่                      
+            <textarea id="poemInput" rows="6" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition placeholder-gray-400 font-medium" placeholder="วางอินทรวิเชียรฉันท์ ๑๑ ของท่านทีนี่
+ตัวอย่าง :
+ยามเพื่อนสบายใจ
+ก็ฤทัยระรื่นชู
+เมื่อมิตรสิหดหู่
 มิละห่าง ฤ หายหนี"></textarea>
             
-            <div class="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex flex-col md:flex-row gap-4 items-start shadow-sm">
-                <div class="flex-shrink-0 mt-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <div class="flex-grow">
-                    <h4 class="font-bold text-gray-800 text-sm mb-2">💡 คำแนะนำ: หากระบบนับพยางค์ผิด (รวบคำ)</h4>
-                    <p class="text-sm text-gray-600 mb-3">
-                        หากมีคำศัพท์เฉพาะหรือชื่อคนที่ระบบรวบเป็น 1 คำ ให้ท่าน <b>"เคาะวรรค"</b> ตรงกลางคำนั้น เพื่อบังคับให้ระบบแยกพยางค์
-                    </p>
-                    <div class="bg-white border border-gray-200 rounded-lg p-3 text-sm flex flex-wrap gap-4 items-center shadow-inner">
-                        <div class="text-red-500 flex items-center gap-2">
-                            <span class="font-bold">❌ ระบบรวบผิด:</span>
-                            <span class="bg-red-50 px-2 py-1 rounded border border-red-100 font-mono">ตากลม</span>
-                            <span class="text-xs text-gray-400">(นับ 1 คำ)</span>
-                        </div>
-                        <div class="text-gray-300">➜</div>
-                        <div class="text-green-600 flex items-center gap-2">
-                            <span class="font-bold">✅ วิธีแก้ (เคาะวรรค):</span>
-                            <span class="bg-green-50 px-2 py-1 rounded border border-green-100 ring-2 ring-green-100 font-mono">ตา กลม</span>
-                            <span class="text-xs text-gray-400">(นับ 2 คำ)</span>
-                        </div>
+            <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-sm">
+                <div class="flex items-start gap-3">
+                    <div class="mt-1 text-blue-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div class="flex-grow">
+                        <h4 class="font-bold text-gray-800 text-sm mb-1">คำแนะนำ: การแยกพยางค์และคำอ่าน 2 แบบ</h4>
+                        <p class="text-sm text-gray-600 leading-relaxed mb-3">
+                            กรณีคำบางคำสามารถอ่านได้ 2 แบบ จึงสามารถเป็นคำครุ ก็ได้ คำลหุ ก็ได้ เช่น <b>"ดุจ"</b> 
+                            <ul class="list-disc ml-5 text-sm text-gray-600 mt-1 mb-2">
+                                <li>ถ้าลงในกรอบตำแหน่งครุ (อ่านว่า ดุด)</li>
+                                <li>ถ้าลงในกรอบตำแหน่งลหุ จะได้ 2 กรอบ (อ่านว่า ดุ-จะ) <b>ให้ผู้ใช้งานตรวจสอบด้วยตนเอง</b></li>
+                            </ul>
+                            <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-xs font-bold">เทคนิค</span> 
+                            <span class="text-sm text-gray-600">กรณีจะให้อ่านแบบลหุให้ <b>เคาะวรรคแยกคำ</b> เช่น <b>ดุจ</b> เป็น <b>ดุ จ</b> ก่อนประมวลผล</span>
+                        </p>
                     </div>
                 </div>
             </div>
 
             <div class="flex justify-end mt-6">
-                <button onclick="analyzePoem()" class="btn-animate bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3 px-8 rounded-full shadow-lg flex items-center gap-3 text-lg cursor-pointer transform transition hover:-translate-y-1">
+                <button onclick="analyzePoem()" class="btn-animate bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-3 px-8 rounded-full shadow-lg flex items-center gap-3 text-lg cursor-pointer transition">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                     ตรวจสอบผลงาน
                 </button>
@@ -143,7 +143,7 @@
 
         <div id="resultArea" class="hidden animate-fade-in-up">
             <div class="flex items-center gap-2 mb-4">
-                <div class="w-1.5 h-8 bg-indigo-600 rounded-full"></div>
+                <div class="w-1.5 h-8 bg-purple-600 rounded-full"></div>
                 <h3 class="text-xl font-bold text-gray-800">ผลการวิเคราะห์</h3>
             </div>
             
@@ -162,16 +162,32 @@
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm overflow-x-auto hover:shadow-md transition">
+            <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm overflow-x-auto hover:shadow-md transition mb-6">
                 <div id="visualResult" class="space-y-6 min-w-[600px]"></div>
+            </div>
+
+            <div class="bg-gray-50 rounded-xl border border-gray-200 p-6 relative">
+                <h4 class="font-bold text-gray-700 mb-3 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
+                    </svg>
+                    สรุปผลการตรวจสอบ
+                </h4>
+                <div class="bg-white border border-gray-300 rounded-lg p-4 text-sm text-gray-700 font-mono overflow-x-auto" id="summaryText"></div>
+                <div class="mt-3 flex justify-end">
+                    <button onclick="copySummary()" id="btnCopy" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg text-sm flex items-center gap-2 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                        </svg>
+                        คัดลอกผลการตรวจสอบ
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // ----------------------------------------------------
-        // 1. HELPER FUNCTIONS
-        // ----------------------------------------------------
+        // --- Helper Functions ---
 
         function processLeadingConsonants(word) {
             const anamYWords = ['อย่า', 'อยู่', 'อย่าง', 'อยาก'];
@@ -233,25 +249,24 @@
             return false;
         }
 
-        // --- isLahu Logic (V2.6) ---
         function isLahu(word) {
             if (!word) return false;
             word = word.trim();
             const cleanWord = word.replace(/[่้๊๋์]/g, '');
             const processedWord = processLeadingConsonants(cleanWord);
             
-            // 1. คำยกเว้น
-            const specialLahu = ["ก็", "บ่", "ณ", "ธ", "จะ", "ทิ", "ปิ", "ยะ", "สิ", "ธุ", "ระ", "พะ", "มิ", "ดุ", "เตะ", "กะ", "นิ", "ผลิ", "ลุ", "ฤ"];
+            // 1. คำยกเว้นที่เป็นลหุ (รวม อิ, กะ, นิ, ผลิ, ลุ, ฤ, ติ, สิ)
+            const specialLahu = ["ก็", "บ่", "ณ", "ธ", "จะ", "ทิ", "ปิ", "ยะ", "สิ", "ธุ", "ระ", "พะ", "มิ", "ดุ", "เตะ", "กะ", "นิ", "ผลิ", "ลุ", "ฤ", "อิ", "ติ", "อุ"];
             if (specialLahu.includes(word)) return true;
 
-            // 2. สระเกิน -> ครุ
+            // 2. กฎสระเกิน (อำ, ไอ, ใอ, เอา) -> ครุ
             if (processedWord.includes("ำ") || processedWord.includes("ไ") || processedWord.includes("ใ")) return false; 
             if (processedWord.includes("เ") && processedWord.includes("า")) return false;
 
-            // 3. ตัวสะกด -> ครุ
+            // 3. มีตัวสะกด -> ครุ
             if (hasEndingConsonant(word)) return false;
 
-            // 4. สระยาว -> ครุ
+            // 4. สระเสียงยาว -> ครุ
             const forceKruLongVowels = ["า", "ี", "ื", "ู", "เ", "แ", "โ", "อ"];
             let hasLongVowel = false;
             for (let v of forceKruLongVowels) if (processedWord.includes(v)) hasLongVowel = true;
@@ -261,7 +276,6 @@
                 let isShortened = false;
                 for (let s of shorteners) if (processedWord.includes(s)) isShortened = true;
                 if (processedWord.includes("เอาะ") || processedWord.includes("เออะ") || processedWord.includes("อัวะ") || processedWord.includes("เอียะ")) isShortened = true;
-                
                 if (!isShortened) return false; 
             }
             return true; 
@@ -274,9 +288,7 @@
             return sound1.vowel === sound2.vowel && sound1.finalGroup === sound2.finalGroup;
         }
 
-        // ----------------------------------------------------
-        // 2. TOKENIZER
-        // ----------------------------------------------------
+        // --- 2. TOKENIZER (With Akson Nam & Mai Han-Akat Fix) ---
         
         const MANUAL_SPLITS = {
             "คิดถึง": ["คิด", "ถึง"], "หัวใจ": ["หัว", "ใจ"], "เสียใจ": ["เสีย", "ใจ"], "ดีใจ": ["ดี", "ใจ"],
@@ -314,7 +326,9 @@
             "ปัญหา": ["ปัน", "หา"], "สำเร็จ": ["สำ", "เร็จ"], "ล้มเหลว": ["ล้ม", "เหลว"], "โชคดี": ["โชค", "ดี"],
             "โชคร้าย": ["โชค", "ร้าย"], "โอกาส": ["โอ", "กาส"], "พัฒนา": ["พัท", "ทะ", "นา"], "ศึกษา": ["ศึก", "ษา"],
             "เรียนรู้": ["เรียน", "รู้"], "อบรม": ["อบ", "รม"], "ดูแล": ["ดู", "แล"], "รักษา": ["รัก", "ษา"],
-            "ป้องกัน": ["ป้อง", "กัน"], "เติบโต": ["เติบ", "โต"]
+            "ป้องกัน": ["ป้อง", "กัน"], "เติบโต": ["เติบ", "โต"], "สกัด": ["สะ", "กัด"], "สลัด": ["สะ", "ลัด"],
+            "ขจัด": ["ขะ", "จัด"], "ถนัด": ["ถะ", "หนัด"], "ฉบับ": ["ฉะ", "บับ"], "สดับ": ["สะ", "ดับ"],
+            "สลับ": ["สะ", "ลับ"], "ขยับ": ["ขะ", "หยับ"], "ตวัด": ["ตะ", "หวัด"]
         };
 
         function tokenizeLine(lineText) {
@@ -323,21 +337,65 @@
             const rawWords = Array.from(segmenter.segment(lineText)).filter(s => s.isWordLike).map(s => s.segment.trim());
             
             let finalSyllables = [];
+            // คำควบกล้ำแท้ (True Clusters) - ห้ามแยก
+            const TRUE_CLUSTERS = ['กร', 'กล', 'กว', 'ขร', 'ขล', 'ขว', 'คร', 'คล', 'คว', 'ตร', 'ปร', 'ปล', 'ผล', 'พล', 'พร'];
+
             rawWords.forEach(word => {
+                // 1. Dictionary Check
                 if (MANUAL_SPLITS[word]) {
                     finalSyllables.push(...MANUAL_SPLITS[word]);
                     return;
                 }
+
+                // 2. Pattern: อักษรนำ + ไม้หันอากาศ + ตัวสะกด (เช่น สกัด, สลัด, ขจัด)
+                // Regex: พยัญชนะ + พยัญชนะ + ไม้หันอากาศ + พยัญชนะ (C1 C2 ั C3)
+                // ต้องกรอง: ไม่ใช่ ห นำ (หวัง, หมัด), ไม่ใช่ อ นำ ย (อย่า), ไม่ใช่ควบแท้ (ครับ, กลับ)
+                if (word.length === 4 && word.charAt(2) === 'ั') {
+                    const c1 = word.charAt(0);
+                    const c2 = word.charAt(1);
+                    const clusterCheck = c1 + c2;
+                    
+                    // เงื่อนไข: ไม่ขึ้นต้นด้วย ห, ไม่ใช่ อ ย, ไม่ใช่ควบแท้
+                    if (c1 !== 'ห' && !(c1 === 'อ' && c2 === 'ย') && !TRUE_CLUSTERS.includes(clusterCheck)) {
+                        // แยกเป็น 2 พยางค์ (สะ-กัด)
+                        finalSyllables.push(word.substring(0,2)); // เอา 2 ตัวแรกไปก่อน (แต่จริงๆ มันอ่าน อะ กึ่งเสียง) 
+                        // *Hack for Logic*: เพื่อให้ check ครุ-ลหุ ง่าย เราอาจจะส่ง "สะ" ไปตรงๆ 
+                        // แต่ถ้าส่ง "สก" ระบบอาจงง ดังนั้นส่ง "สะ" (จำลอง) หรือส่ง "ส" "กัด" ?
+                        // ถ้าส่ง "ส" -> isLahu("ส") -> True (เพราะไม่มีสระ) -> OK
+                        // แต่ถ้า "ส" ไปแสดงผลมันจะดูแปลกๆ
+                        // วิธีที่ดีที่สุด: ส่ง "สะ" และ "ตัดตัวที่เหลือ"
+                        // หรือส่งเป็นคำเต็มแต่บังคับแยก: เราแยก string เลยดีกว่า
+                        // สมมติ "สกัด" -> "สะ", "กัด"
+                        // แต่เราไม่รู้เสียงอ่าน 100% (บางคำอาจไม่ใช่)
+                        // เอาแบบ safe: ถ้าเข้าเกณฑ์นี้ ให้แยก index 1
+                        // แต่เพื่อให้แสดงผลสวยและตรวจถูก:
+                        // คำพวกนี้พยางค์แรกเป็น ลหุ (เสียง อะ) พยางค์สองมักเป็น ครุ (มีตัวสะกด)
+                        
+                        // Trick: Insert 'ะ' visually? No, just split char 0 and char 1-3?
+                        // "ส" "กัด". "ส" alone -> isLahu? 
+                        // isLahu("ส") -> true (short, no final). OK.
+                        // isLahu("กัด") -> false (ending consonant). OK.
+                        finalSyllables.push(word.charAt(0)); 
+                        finalSyllables.push(word.substring(1));
+                        return;
+                    }
+                }
+
+                // 3. Pattern "ปิยะ" (C-S-C-A)
                 const piyaPattern = /^([ก-ฮ][ิุ][ก-ฮ]ะ)$/;
                 if (word.match(piyaPattern)) {
                     finalSyllables.push(word.substring(0,2), word.substring(2));
                     return;
                 }
+
+                // 4. Pattern "กะทิ" (C-A-C-S)
                 const maliPattern = /^([ก-ฮ]ะ[ก-ฮ][ิุะ]?)$/;
                 if (word.length > 2 && word.match(maliPattern)) {
                      finalSyllables.push(word.substring(0,2), word.substring(2));
                      return;
                 }
+
+                // 5. สระนำกลางคำ
                 if (word.length > 2) {
                     let splitIndices = [];
                     for(let i=1; i<word.length; i++) if ("เแโใไ".includes(word[i])) splitIndices.push(i);
@@ -358,9 +416,7 @@
             return finalSyllables;
         }
 
-        // ----------------------------------------------------
-        // 3. MAIN LOGIC (Line-by-Line)
-        // ----------------------------------------------------
+        // --- 3. MAIN LOGIC ---
 
         const PATTERN_STANZA = [
             ['K', 'K', 'L', 'K', 'K'],          
@@ -368,6 +424,9 @@
             ['K', 'K', 'L', 'K', 'K'],          
             ['L', 'L', 'K', 'L', 'K', 'K']      
         ];
+
+        // Global vars for summary
+        let summaryData = "";
 
         function analyzePoem() {
             const input = document.getElementById('poemInput').value;
@@ -429,6 +488,7 @@
             const kruLahuSummary = document.getElementById('kruLahuSummary');
             const wordCountSummary = document.getElementById('wordCountSummary');
             const samphusSummary = document.getElementById('samphusSummary');
+            const summaryTextBox = document.getElementById('summaryText');
             
             visualDiv.innerHTML = '';
             resultArea.classList.remove('hidden');
@@ -436,6 +496,8 @@
             let errorKruLahuCount = 0;
             let missingWordCount = 0;
             let extraWordCount = 0;
+            let samphusPassCount = 0;
+            let samphusFailCount = 0;
             
             poem.forEach((verse, vIndex) => {
                 const verseDiv = document.createElement('div');
@@ -451,7 +513,6 @@
 
                 verse.forEach((word, wIndex) => {
                     const expected = pattern[vIndex][wIndex]; 
-                    
                     const box = document.createElement('div');
                     
                     if(word === '?') {
@@ -459,6 +520,9 @@
                          box.innerHTML = `<span class="text-sm font-bold">ขาด</span>`;
                          missingWordCount++;
                     } else {
+                        // Hack for display "ส" -> "สะ" if it was split from Akson Nam?
+                        // For simplicity, display original char but analyze as Lahu.
+                        // "ส" isLahu -> true.
                         const isLahuWord = isLahu(word);
                         const actual = isLahuWord ? 'L' : 'K';
                         let bgClass = actual === 'K' ? 'kru-bg' : 'lahu-bg';
@@ -486,7 +550,6 @@
                     const extraContainer = document.createElement('div');
                     extraContainer.className = "ml-4 pl-4 border-l-2 border-red-200";
                     extraContainer.innerHTML = `<span class="text-xs text-red-500 font-bold block mb-1">คำเกิน:</span>`;
-                    
                     extras.forEach(w => {
                         extraWordCount++;
                         const sp = document.createElement('span');
@@ -509,6 +572,7 @@
             });
 
             let rhymeHTML = '';
+            let rhymeSummaryText = '';
             rhymePairs.forEach(pair => {
                 const w1 = poem[pair.from[0]]?.[pair.from[1]];
                 const w2 = poem[pair.to[0]]?.[pair.to[1]];
@@ -516,26 +580,32 @@
                 if(w1 && w2 && w1 !== '?' && w2 !== '?') {
                     const isRhyme = checkSamphus(w1, w2);
                     if(isRhyme) {
+                        samphusPassCount++;
                         rhymeHTML += `<div class="flex items-center text-green-700 bg-green-50 p-2 rounded-lg border border-green-100 mb-1">
                             <span class="mr-2">✅</span> 
                             <span class="text-xs font-bold mr-2 border border-green-200 px-1 rounded text-green-600">${pair.name}</span>
-                            <span><b>${w1}</b> - <b>${w2}</b> (สัมผัส)</span>
+                            <span><b>${w1}</b> - <b>${w2}</b></span>
                         </div>`;
+                        rhymeSummaryText += `   - ${pair.name}: ผ่าน (${w1}-${w2})\n`;
                     } else {
+                        samphusFailCount++;
                         rhymeHTML += `<div class="flex items-center text-red-700 bg-red-50 p-2 rounded-lg border border-red-100 mb-1">
                             <span class="mr-2">❌</span> 
                              <span class="text-xs font-bold mr-2 border border-red-200 px-1 rounded text-red-500">${pair.name}</span>
-                            <span><b>${w1}</b> - <b>${w2}</b> (ไม่สัมผัส)</span>
+                            <span><b>${w1}</b> - <b>${w2}</b></span>
                         </div>`;
+                        rhymeSummaryText += `   - ${pair.name}: ไม่ผ่าน (${w1}-${w2})\n`;
                     }
                 } else {
                     rhymeHTML += `<div class="flex items-center text-gray-400 p-2 text-sm mb-1">
                         <span class="mr-2">⚪</span> ${pair.name}: ข้อมูลไม่ครบ
                     </div>`;
+                    rhymeSummaryText += `   - ${pair.name}: ตรวจสอบไม่ได้ (คำไม่ครบ)\n`;
                 }
             });
             samphusSummary.innerHTML = rhymeHTML;
 
+            // Status Display
             if (errorKruLahuCount === 0) {
                 kruLahuSummary.innerHTML = `<h2 class="text-3xl font-bold text-green-500">ผ่าน!</h2><p class="text-gray-500 text-sm">ฉันทลักษณ์ (ครุ-ลหุ) ถูกต้อง</p>`;
             } else {
@@ -543,15 +613,43 @@
             }
 
             let wordStatusHTML = '';
+            let wordStatusText = '';
             if (missingWordCount === 0 && extraWordCount === 0) {
                 wordStatusHTML = `<h2 class="text-3xl font-bold text-green-500">พอดีเป๊ะ</h2><p class="text-gray-500 text-sm">จำนวนคำครบถ้วน</p>`;
+                wordStatusText = "ครบถ้วน";
             } else {
-                if (missingWordCount > 0) wordStatusHTML += `<div class="text-yellow-600 font-bold">⚠️ ขาด ${missingWordCount} คำ</div>`;
-                if (extraWordCount > 0) wordStatusHTML += `<div class="text-red-600 font-bold">⛔ เกิน ${extraWordCount} คำ</div>`;
+                let msg = [];
+                if (missingWordCount > 0) msg.push(`ขาด ${missingWordCount} คำ`);
+                if (extraWordCount > 0) msg.push(`เกิน ${extraWordCount} คำ`);
+                wordStatusHTML = `<div class="text-red-600 font-bold text-xl">${msg.join(' / ')}</div>`;
+                wordStatusText = msg.join(' และ ');
             }
             wordCountSummary.innerHTML = wordStatusHTML;
 
+            // --- Generate Final Summary Text ---
+            let finalSummary = "สรุปผลการตรวจสอบอินทรวิเชียรฉันท์ ๑๑\n";
+            finalSummary += "--------------------------------\n";
+            finalSummary += `[${errorKruLahuCount===0 ? '/' : ' '}] ผังบังคับ (ครุ-ลหุ): ${errorKruLahuCount===0 ? 'ถูกต้อง' : 'พบข้อผิดพลาด ' + errorKruLahuCount + ' จุด'}\n`;
+            finalSummary += `[${(missingWordCount===0 && extraWordCount===0) ? '/' : ' '}] จำนวนคำ: ${wordStatusText}\n`;
+            finalSummary += `[${samphusFailCount===0 ? '/' : ' '}] สัมผัสบังคับ: ${samphusFailCount===0 ? 'ถูกต้องทั้งหมด' : 'พบจุดผิด ' + samphusFailCount + ' จุด'}\n`;
+            finalSummary += rhymeSummaryText;
+            finalSummary += "--------------------------------\n";
+            finalSummary += "(ตรวจสอบโดย ระบบตรวจทานอินทรวิเชียรฉันท์ V2.8)";
+            
+            summaryTextBox.textContent = finalSummary;
+            
+            // Smooth Scroll to result
             resultArea.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function copySummary() {
+            const text = document.getElementById('summaryText').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.getElementById('btnCopy');
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = `<span class="text-green-600">คัดลอกเรียบร้อย!</span>`;
+                setTimeout(() => btn.innerHTML = originalHTML, 2000);
+            });
         }
     </script>
 </body>
