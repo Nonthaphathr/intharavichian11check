@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบตรวจทานอินทรวิเชียรฉันท์ ๑๑ (V2.9.1 Fix Sara Aw)</title>
+    <title>ระบบตรวจทานอินทรวิเชียรฉันท์ ๑๑ (V3.0 Strict Rhyme)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -101,7 +101,7 @@
         <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-100">
             <label class="block text-gray-700 font-bold mb-2 flex flex-col md:flex-row md:items-center justify-between gap-2">
                 <span class="flex items-center gap-2 text-lg">📝 วางบทประพันธ์ (แยกบรรทัดให้ชัดเจน)</span>
-                <span class="text-xs font-normal text-gray-500 bg-gray-100 px-3 py-1 rounded-full">V2.9.1 (แก้สระเอาะสมบูรณ์)</span>
+                <span class="text-xs font-normal text-gray-500 bg-gray-100 px-3 py-1 rounded-full">V3.0 (แก้กฎสัมผัส เกม!=ลม)</span>
             </label>
             
             <textarea id="poemInput" rows="6" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition placeholder-gray-400 font-medium" placeholder="วางอินทรวิเชียรฉันท์ ๑๑ ของท่านทีนี่
@@ -189,7 +189,9 @@
     </div>
 
     <script>
-        // --- Helper Functions ---
+        // ==========================================
+        // 1. CORE LOGIC (Restored from Original & Improved)
+        // ==========================================
 
         function processLeadingConsonants(word) {
             const anamYWords = ['อย่า', 'อยู่', 'อย่าง', 'อยาก'];
@@ -216,12 +218,49 @@
             return 'กกา';
         }
 
+        // --- ⭐ V3.0 Strict Vowel Detection ⭐ ---
         function getVowelSound(word) {
+            // 1. Check complex vowels
             if (hasAiVowel(word)) return 'ไอ';
+            if (word.includes('เอีย')) return 'เอีย';
+            if (word.includes('เอือ')) return 'เอือ';
+            if (word.includes('อัว')) return 'อัว';
+            if (word.includes('เอาะ')) return 'เอาะ';
+            if (word.includes('เออะ')) return 'เออะ';
+            if (word.includes('เอียะ')) return 'เอียะ';
+            if (word.includes('เอือะ')) return 'เอือะ';
+            if (word.includes('อัวะ')) return 'อัวะ';
+            
             if (word.includes('อำ') || word.includes('ำ')) return 'อำ';
-            const shortVowels = ['ะ', 'ิ', 'ึ', 'ุ', '็', 'ั'];
-            for(let v of shortVowels) if(word.includes(v)) return 'อะ'; 
-            return 'อา'; 
+            if (word.includes('เอา') || (word.includes('เ') && word.includes('า'))) return 'เอา';
+            
+            if (word.includes('เออ')) return 'เออ';
+            if (word.includes('แอ')) return 'แอ';
+            if (word.includes('โอ')) return 'โอ';
+            if (word.includes('ออ')) return 'ออ';
+            if (word.includes('อื')) return 'อื';
+            if (word.includes('อู')) return 'อู';
+            if (word.includes('อี')) return 'อี';
+            if (word.includes('อา') || word.includes('า')) return 'อา';
+            
+            if (word.includes('เอะ')) return 'เอะ';
+            if (word.includes('แอะ')) return 'แอะ';
+            if (word.includes('โอะ')) return 'โอะ';
+            if (word.includes('อึ')) return 'อึ';
+            if (word.includes('อุ')) return 'อุ';
+            if (word.includes('อิ')) return 'อิ';
+            if (word.includes('อะ') || word.includes('ะ') || word.includes('ั')) return 'อะ';
+            
+            // 2. Specific Vowel Form Checks
+            if (word.includes('เ')) return 'เอ'; // Game -> 'Eh'
+            if (word.includes('โ')) return 'โอ';
+            
+            // 3. Implicit Vowels (No visible vowel marks)
+            // If no vowel markers found, assume Implicit Short O (Sara O) like "ลม", "นก"
+            const vowels = /[ะาิีึืุูเแโใไำั]/;
+            if (!word.match(vowels)) return 'โอะ'; // Lom -> 'Oh'
+
+            return 'อา'; // Default fallback
         }
 
         function getVowelAndFinalSound(word) {
@@ -234,8 +273,11 @@
             if (processedWord.endsWith('รรม')) return { vowel: 'อำ', finalGroup: 'กกา' };
             if (processedWord.endsWith('รร')) return { vowel: 'อะ', finalGroup: 'กน' };
             if (processedWord.endsWith('รรณ')) return { vowel: 'อะ', finalGroup: 'กน' };
-            if (hasAiVowel(processedWord)) return { vowel: 'ไอ', finalGroup: 'เกย' };
-            return { vowel: getVowelSound(processedWord), finalGroup: getFinalConsonantGroup(processedWord) };
+            
+            // Logic Reuse
+            const vowel = getVowelSound(processedWord);
+            const finalGroup = getFinalConsonantGroup(processedWord);
+            return { vowel, finalGroup };
         }
 
         function hasEndingConsonant(word) {
@@ -251,29 +293,24 @@
             return false;
         }
 
-        // --- ⭐ isLahu FIXED (Check endsWith 'ะ' BEFORE Sara Ao) ⭐ ---
         function isLahu(word) {
             if (!word) return false;
             word = word.trim();
             const cleanWord = word.replace(/[่้๊๋์]/g, '');
             const processedWord = processLeadingConsonants(cleanWord);
             
-            // 1. คำยกเว้น
             const specialLahu = ["ก็", "บ่", "ณ", "ธ", "จะ", "ทิ", "ปิ", "ยะ", "สิ", "ธุ", "ระ", "พะ", "มิ", "ดุ", "เตะ", "กะ", "นิ", "ผลิ", "ลุ", "ฤ", "อิ", "ติ", "อุ"];
             if (specialLahu.includes(word)) return true;
 
-            // 2. ⭐ FIX: ถ้าลงท้ายด้วยสระ 'ะ' (เช่น เพราะ, เกาะ, และ, กะ, เ-าะ) -> ลหุ
-            // ต้องเช็คอันนี้ *ก่อน* เช็คสระเอา (เ...า) เพราะคำว่า "เพราะ" มีทั้ง เ และ า
-            if (processedWord.endsWith("ะ")) return true;
+            // Priority Check: Ends with 'ะ' or 'เอาะ' -> Lahu
+            if (processedWord.endsWith("ะ") || processedWord.includes("เอาะ")) return true;
 
-            // 3. สระเกิน (อำ, ไอ, ใอ, เอา) -> ครุ
+            // Sara Gern -> Kru
             if (processedWord.includes("ำ") || processedWord.includes("ไ") || processedWord.includes("ใ")) return false; 
             if (processedWord.includes("เ") && processedWord.includes("า")) return false;
 
-            // 4. มีตัวสะกด -> ครุ
             if (hasEndingConsonant(word)) return false;
 
-            // 5. สระยาว -> ครุ
             const forceKruLongVowels = ["า", "ี", "ื", "ู", "เ", "แ", "โ", "อ"];
             let hasLongVowel = false;
             for (let v of forceKruLongVowels) if (processedWord.includes(v)) hasLongVowel = true;
@@ -283,7 +320,6 @@
                 let isShortened = false;
                 for (let s of shorteners) if (processedWord.includes(s)) isShortened = true;
                 if (processedWord.includes("เอาะ") || processedWord.includes("เออะ") || processedWord.includes("อัวะ") || processedWord.includes("เอียะ")) isShortened = true;
-                
                 if (!isShortened) return false; 
             }
             return true; 
@@ -293,6 +329,8 @@
             if (!word1 || !word2) return false;
             const sound1 = getVowelAndFinalSound(word1);
             const sound2 = getVowelAndFinalSound(word2);
+            // Debug log if needed
+            // console.log(word1, sound1, word2, sound2);
             return sound1.vowel === sound2.vowel && sound1.finalGroup === sound2.finalGroup;
         }
 
@@ -609,7 +647,7 @@
             finalSummary += `[${samphusFailCount===0 ? '/' : ' '}] สัมผัสบังคับ: ${samphusFailCount===0 ? 'ถูกต้องทั้งหมด' : 'พบจุดผิด ' + samphusFailCount + ' จุด'}\n`;
             finalSummary += rhymeSummaryText;
             finalSummary += "--------------------------------\n";
-            finalSummary += "(ตรวจสอบโดย ระบบตรวจทานอินทรวิเชียรฉันท์ V2.8)";
+            finalSummary += "(ตรวจสอบโดย ระบบตรวจทานอินทรวิเชียรฉันท์ V3.0)";
             
             summaryTextBox.textContent = finalSummary;
             
