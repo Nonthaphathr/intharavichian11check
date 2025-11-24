@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบตรวจทานอินทรวิเชียรฉันท์ ๑๑ (V2.8 Final)</title>
+    <title>ระบบตรวจทานอินทรวิเชียรฉันท์ ๑๑ (V2.9 Detailed Fixes)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -15,9 +15,9 @@
             flex-direction: column; 
             align-items: center; 
             justify-content: center;
-            width: 60px; 
-            height: 65px; 
-            margin: 4px; 
+            width: 65px; /* ขยายความกว้างเล็กน้อย */
+            height: 70px; 
+            margin: 6px; 
             border-radius: 8px;
             position: relative;
             transition: all 0.2s;
@@ -33,15 +33,17 @@
         .syllable-type { font-size: 0.7rem; opacity: 0.8; }
         .badge {
             position: absolute;
-            top: -6px;
-            right: -6px;
+            top: -8px;
+            right: -15px; /* ขยับขวาเพื่อให้ข้อความยาวๆ ไม่บังคำ */
             color: white;
-            font-size: 0.6rem;
+            font-size: 0.55rem;
             padding: 2px 6px;
             border-radius: 10px;
             font-weight: bold;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             z-index: 10;
+            white-space: nowrap; /* ห้ามตัดบรรทัด */
+            width: max-content;
         }
         .badge-error { background-color: #ef4444; }
         
@@ -99,7 +101,7 @@
         <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-100">
             <label class="block text-gray-700 font-bold mb-2 flex flex-col md:flex-row md:items-center justify-between gap-2">
                 <span class="flex items-center gap-2 text-lg">📝 วางบทประพันธ์ (แยกบรรทัดให้ชัดเจน)</span>
-                <span class="text-xs font-normal text-gray-500 bg-gray-100 px-3 py-1 rounded-full">V2.8 (แก้สระอิ/สกัด/สลัด)</span>
+                <span class="text-xs font-normal text-gray-500 bg-gray-100 px-3 py-1 rounded-full">V2.9 (แก้สระเอาะ / ป้ายเตือนละเอียด)</span>
             </label>
             
             <textarea id="poemInput" rows="6" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition placeholder-gray-400 font-medium" placeholder="วางอินทรวิเชียรฉันท์ ๑๑ ของท่านทีนี่
@@ -249,24 +251,28 @@
             return false;
         }
 
+        // --- ⭐ V2.9: Corrected isLahu (Check 'เอาะ' first) ⭐ ---
         function isLahu(word) {
             if (!word) return false;
             word = word.trim();
             const cleanWord = word.replace(/[่้๊๋์]/g, '');
             const processedWord = processLeadingConsonants(cleanWord);
             
-            // 1. คำยกเว้นที่เป็นลหุ (รวม อิ, กะ, นิ, ผลิ, ลุ, ฤ, ติ, สิ)
+            // 1. คำยกเว้น
             const specialLahu = ["ก็", "บ่", "ณ", "ธ", "จะ", "ทิ", "ปิ", "ยะ", "สิ", "ธุ", "ระ", "พะ", "มิ", "ดุ", "เตะ", "กะ", "นิ", "ผลิ", "ลุ", "ฤ", "อิ", "ติ", "อุ"];
             if (specialLahu.includes(word)) return true;
 
-            // 2. กฎสระเกิน (อำ, ไอ, ใอ, เอา) -> ครุ
+            // 2. สระเอาะ (เ-าะ) -> ลหุ (ต้องเช็คก่อนสระเอา)
+            if (processedWord.includes("เอาะ")) return true;
+
+            // 3. สระเกิน (อำ, ไอ, ใอ, เอา) -> ครุ
             if (processedWord.includes("ำ") || processedWord.includes("ไ") || processedWord.includes("ใ")) return false; 
             if (processedWord.includes("เ") && processedWord.includes("า")) return false;
 
-            // 3. มีตัวสะกด -> ครุ
+            // 4. มีตัวสะกด -> ครุ
             if (hasEndingConsonant(word)) return false;
 
-            // 4. สระเสียงยาว -> ครุ
+            // 5. สระยาว -> ครุ
             const forceKruLongVowels = ["า", "ี", "ื", "ู", "เ", "แ", "โ", "อ"];
             let hasLongVowel = false;
             for (let v of forceKruLongVowels) if (processedWord.includes(v)) hasLongVowel = true;
@@ -276,6 +282,7 @@
                 let isShortened = false;
                 for (let s of shorteners) if (processedWord.includes(s)) isShortened = true;
                 if (processedWord.includes("เอาะ") || processedWord.includes("เออะ") || processedWord.includes("อัวะ") || processedWord.includes("เอียะ")) isShortened = true;
+                
                 if (!isShortened) return false; 
             }
             return true; 
@@ -288,7 +295,7 @@
             return sound1.vowel === sound2.vowel && sound1.finalGroup === sound2.finalGroup;
         }
 
-        // --- 2. TOKENIZER (With Akson Nam & Mai Han-Akat Fix) ---
+        // --- 2. TOKENIZER (Standard) ---
         
         const MANUAL_SPLITS = {
             "คิดถึง": ["คิด", "ถึง"], "หัวใจ": ["หัว", "ใจ"], "เสียใจ": ["เสีย", "ใจ"], "ดีใจ": ["ดี", "ใจ"],
@@ -337,65 +344,36 @@
             const rawWords = Array.from(segmenter.segment(lineText)).filter(s => s.isWordLike).map(s => s.segment.trim());
             
             let finalSyllables = [];
-            // คำควบกล้ำแท้ (True Clusters) - ห้ามแยก
             const TRUE_CLUSTERS = ['กร', 'กล', 'กว', 'ขร', 'ขล', 'ขว', 'คร', 'คล', 'คว', 'ตร', 'ปร', 'ปล', 'ผล', 'พล', 'พร'];
 
             rawWords.forEach(word => {
-                // 1. Dictionary Check
                 if (MANUAL_SPLITS[word]) {
                     finalSyllables.push(...MANUAL_SPLITS[word]);
                     return;
                 }
 
-                // 2. Pattern: อักษรนำ + ไม้หันอากาศ + ตัวสะกด (เช่น สกัด, สลัด, ขจัด)
-                // Regex: พยัญชนะ + พยัญชนะ + ไม้หันอากาศ + พยัญชนะ (C1 C2 ั C3)
-                // ต้องกรอง: ไม่ใช่ ห นำ (หวัง, หมัด), ไม่ใช่ อ นำ ย (อย่า), ไม่ใช่ควบแท้ (ครับ, กลับ)
+                // Check for Akson Nam pattern C1 C2 ั C3
                 if (word.length === 4 && word.charAt(2) === 'ั') {
                     const c1 = word.charAt(0);
                     const c2 = word.charAt(1);
                     const clusterCheck = c1 + c2;
-                    
-                    // เงื่อนไข: ไม่ขึ้นต้นด้วย ห, ไม่ใช่ อ ย, ไม่ใช่ควบแท้
                     if (c1 !== 'ห' && !(c1 === 'อ' && c2 === 'ย') && !TRUE_CLUSTERS.includes(clusterCheck)) {
-                        // แยกเป็น 2 พยางค์ (สะ-กัด)
-                        finalSyllables.push(word.substring(0,2)); // เอา 2 ตัวแรกไปก่อน (แต่จริงๆ มันอ่าน อะ กึ่งเสียง) 
-                        // *Hack for Logic*: เพื่อให้ check ครุ-ลหุ ง่าย เราอาจจะส่ง "สะ" ไปตรงๆ 
-                        // แต่ถ้าส่ง "สก" ระบบอาจงง ดังนั้นส่ง "สะ" (จำลอง) หรือส่ง "ส" "กัด" ?
-                        // ถ้าส่ง "ส" -> isLahu("ส") -> True (เพราะไม่มีสระ) -> OK
-                        // แต่ถ้า "ส" ไปแสดงผลมันจะดูแปลกๆ
-                        // วิธีที่ดีที่สุด: ส่ง "สะ" และ "ตัดตัวที่เหลือ"
-                        // หรือส่งเป็นคำเต็มแต่บังคับแยก: เราแยก string เลยดีกว่า
-                        // สมมติ "สกัด" -> "สะ", "กัด"
-                        // แต่เราไม่รู้เสียงอ่าน 100% (บางคำอาจไม่ใช่)
-                        // เอาแบบ safe: ถ้าเข้าเกณฑ์นี้ ให้แยก index 1
-                        // แต่เพื่อให้แสดงผลสวยและตรวจถูก:
-                        // คำพวกนี้พยางค์แรกเป็น ลหุ (เสียง อะ) พยางค์สองมักเป็น ครุ (มีตัวสะกด)
-                        
-                        // Trick: Insert 'ะ' visually? No, just split char 0 and char 1-3?
-                        // "ส" "กัด". "ส" alone -> isLahu? 
-                        // isLahu("ส") -> true (short, no final). OK.
-                        // isLahu("กัด") -> false (ending consonant). OK.
                         finalSyllables.push(word.charAt(0)); 
                         finalSyllables.push(word.substring(1));
                         return;
                     }
                 }
 
-                // 3. Pattern "ปิยะ" (C-S-C-A)
                 const piyaPattern = /^([ก-ฮ][ิุ][ก-ฮ]ะ)$/;
                 if (word.match(piyaPattern)) {
                     finalSyllables.push(word.substring(0,2), word.substring(2));
                     return;
                 }
-
-                // 4. Pattern "กะทิ" (C-A-C-S)
                 const maliPattern = /^([ก-ฮ]ะ[ก-ฮ][ิุะ]?)$/;
                 if (word.length > 2 && word.match(maliPattern)) {
                      finalSyllables.push(word.substring(0,2), word.substring(2));
                      return;
                 }
-
-                // 5. สระนำกลางคำ
                 if (word.length > 2) {
                     let splitIndices = [];
                     for(let i=1; i<word.length; i++) if ("เแโใไ".includes(word[i])) splitIndices.push(i);
@@ -425,7 +403,6 @@
             ['L', 'L', 'K', 'L', 'K', 'K']      
         ];
 
-        // Global vars for summary
         let summaryData = "";
 
         function analyzePoem() {
@@ -520,9 +497,6 @@
                          box.innerHTML = `<span class="text-sm font-bold">ขาด</span>`;
                          missingWordCount++;
                     } else {
-                        // Hack for display "ส" -> "สะ" if it was split from Akson Nam?
-                        // For simplicity, display original char but analyze as Lahu.
-                        // "ส" isLahu -> true.
                         const isLahuWord = isLahu(word);
                         const actual = isLahuWord ? 'L' : 'K';
                         let bgClass = actual === 'K' ? 'kru-bg' : 'lahu-bg';
@@ -536,10 +510,13 @@
                             errorKruLahuCount++;
                         }
 
+                        // --- ⭐ Detailed Fix Label ⭐ ---
+                        const fixLabel = expected === 'K' ? 'แก้เป็นครุ' : 'แก้เป็นลหุ';
+
                         box.innerHTML = `
                             <span class="syllable-word">${word}</span>
                             <span class="syllable-type">${actual==='K'?'ครุ':'ลหุ'}</span>
-                            ${isError ? '<span class="badge badge-error">แก้</span>' : ''}
+                            ${isError ? `<span class="badge badge-error">${fixLabel}</span>` : ''}
                         `;
                     }
                     contentContainer.appendChild(box);
@@ -605,7 +582,6 @@
             });
             samphusSummary.innerHTML = rhymeHTML;
 
-            // Status Display
             if (errorKruLahuCount === 0) {
                 kruLahuSummary.innerHTML = `<h2 class="text-3xl font-bold text-green-500">ผ่าน!</h2><p class="text-gray-500 text-sm">ฉันทลักษณ์ (ครุ-ลหุ) ถูกต้อง</p>`;
             } else {
@@ -626,7 +602,7 @@
             }
             wordCountSummary.innerHTML = wordStatusHTML;
 
-            // --- Generate Final Summary Text ---
+            // --- Generate Summary Text ---
             let finalSummary = "สรุปผลการตรวจสอบอินทรวิเชียรฉันท์ ๑๑\n";
             finalSummary += "--------------------------------\n";
             finalSummary += `[${errorKruLahuCount===0 ? '/' : ' '}] ผังบังคับ (ครุ-ลหุ): ${errorKruLahuCount===0 ? 'ถูกต้อง' : 'พบข้อผิดพลาด ' + errorKruLahuCount + ' จุด'}\n`;
@@ -638,7 +614,6 @@
             
             summaryTextBox.textContent = finalSummary;
             
-            // Smooth Scroll to result
             resultArea.scrollIntoView({ behavior: 'smooth' });
         }
 
