@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบตรวจทานอินทรวิเชียรฉันท์ ๑๑ (V3.0 Strict Rhyme)</title>
+    <title>ระบบตรวจทานอินทรวิเชียรฉันท์ ๑๑ (V3.0 Final Master)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -101,7 +101,7 @@
         <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-100">
             <label class="block text-gray-700 font-bold mb-2 flex flex-col md:flex-row md:items-center justify-between gap-2">
                 <span class="flex items-center gap-2 text-lg">📝 วางบทประพันธ์ (แยกบรรทัดให้ชัดเจน)</span>
-                <span class="text-xs font-normal text-gray-500 bg-gray-100 px-3 py-1 rounded-full">V3.0 (แก้กฎสัมผัส เกม!=ลม)</span>
+                <span class="text-xs font-normal text-gray-500 bg-gray-100 px-3 py-1 rounded-full">V3.0 (Final Master)</span>
             </label>
             
             <textarea id="poemInput" rows="6" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition placeholder-gray-400 font-medium" placeholder="วางอินทรวิเชียรฉันท์ ๑๑ ของท่านทีนี่
@@ -190,7 +190,7 @@
 
     <script>
         // ==========================================
-        // 1. CORE LOGIC (Restored from Original & Improved)
+        // 1. CORE LOGIC (Updated V3.0 Strict Vowels)
         // ==========================================
 
         function processLeadingConsonants(word) {
@@ -218,9 +218,9 @@
             return 'กกา';
         }
 
-        // --- ⭐ V3.0 Strict Vowel Detection ⭐ ---
+        // --- ⭐ V3.0 Strict Vowel Sound Detection ⭐ ---
         function getVowelSound(word) {
-            // 1. Check complex vowels
+            // 1. Check complex vowels first
             if (hasAiVowel(word)) return 'ไอ';
             if (word.includes('เอีย')) return 'เอีย';
             if (word.includes('เอือ')) return 'เอือ';
@@ -251,22 +251,24 @@
             if (word.includes('อิ')) return 'อิ';
             if (word.includes('อะ') || word.includes('ะ') || word.includes('ั')) return 'อะ';
             
-            // 2. Specific Vowel Form Checks
-            if (word.includes('เ')) return 'เอ'; // Game -> 'Eh'
+            // 2. Specific Vowel Form Checks (Strict)
+            if (word.includes('เ')) return 'เอ'; 
             if (word.includes('โ')) return 'โอ';
             
             // 3. Implicit Vowels (No visible vowel marks)
             // If no vowel markers found, assume Implicit Short O (Sara O) like "ลม", "นก"
+            // List of all Thai vowel markers
             const vowels = /[ะาิีึืุูเแโใไำั]/;
-            if (!word.match(vowels)) return 'โอะ'; // Lom -> 'Oh'
+            if (!word.match(vowels)) return 'โอะ'; // No visible vowel -> Sara Oh (Short)
 
-            return 'อา'; // Default fallback
+            return 'อา'; // Fallback
         }
 
         function getVowelAndFinalSound(word) {
             if (!word) return { vowel: '', finalGroup: '' };
             const cleanWord = word.replace(/[่้๊๋์]/g, '');
             const processedWord = processLeadingConsonants(cleanWord);
+            // Ror Han Logic
             if (/รร[ถตษสศดจชฎฏฐฑฒทธ]$/.test(processedWord)) return { vowel: 'อะ', finalGroup: 'กด' };
             if (/รร[คกขฆ]$/.test(processedWord)) return { vowel: 'อะ', finalGroup: 'กก' };
             if (/รร[พภบปฟ]$/.test(processedWord)) return { vowel: 'อะ', finalGroup: 'กบ' };
@@ -274,7 +276,8 @@
             if (processedWord.endsWith('รร')) return { vowel: 'อะ', finalGroup: 'กน' };
             if (processedWord.endsWith('รรณ')) return { vowel: 'อะ', finalGroup: 'กน' };
             
-            // Logic Reuse
+            if (hasAiVowel(processedWord)) return { vowel: 'ไอ', finalGroup: 'เกย' };
+            
             const vowel = getVowelSound(processedWord);
             const finalGroup = getFinalConsonantGroup(processedWord);
             return { vowel, finalGroup };
@@ -293,24 +296,28 @@
             return false;
         }
 
+        // --- isLahu Logic (Updated V2.9.1) ---
         function isLahu(word) {
             if (!word) return false;
             word = word.trim();
             const cleanWord = word.replace(/[่้๊๋์]/g, '');
             const processedWord = processLeadingConsonants(cleanWord);
             
+            // 1. คำยกเว้น
             const specialLahu = ["ก็", "บ่", "ณ", "ธ", "จะ", "ทิ", "ปิ", "ยะ", "สิ", "ธุ", "ระ", "พะ", "มิ", "ดุ", "เตะ", "กะ", "นิ", "ผลิ", "ลุ", "ฤ", "อิ", "ติ", "อุ"];
             if (specialLahu.includes(word)) return true;
 
-            // Priority Check: Ends with 'ะ' or 'เอาะ' -> Lahu
+            // 2. Ends with 'ะ' or 'เอาะ' -> Lahu
             if (processedWord.endsWith("ะ") || processedWord.includes("เอาะ")) return true;
 
-            // Sara Gern -> Kru
+            // 3. Sara Gern -> Kru
             if (processedWord.includes("ำ") || processedWord.includes("ไ") || processedWord.includes("ใ")) return false; 
             if (processedWord.includes("เ") && processedWord.includes("า")) return false;
 
+            // 4. Final Consonant -> Kru
             if (hasEndingConsonant(word)) return false;
 
+            // 5. Long Vowel -> Kru
             const forceKruLongVowels = ["า", "ี", "ื", "ู", "เ", "แ", "โ", "อ"];
             let hasLongVowel = false;
             for (let v of forceKruLongVowels) if (processedWord.includes(v)) hasLongVowel = true;
@@ -320,6 +327,7 @@
                 let isShortened = false;
                 for (let s of shorteners) if (processedWord.includes(s)) isShortened = true;
                 if (processedWord.includes("เอาะ") || processedWord.includes("เออะ") || processedWord.includes("อัวะ") || processedWord.includes("เอียะ")) isShortened = true;
+                
                 if (!isShortened) return false; 
             }
             return true; 
@@ -329,12 +337,10 @@
             if (!word1 || !word2) return false;
             const sound1 = getVowelAndFinalSound(word1);
             const sound2 = getVowelAndFinalSound(word2);
-            // Debug log if needed
-            // console.log(word1, sound1, word2, sound2);
             return sound1.vowel === sound2.vowel && sound1.finalGroup === sound2.finalGroup;
         }
 
-        // --- 2. TOKENIZER ---
+        // --- 2. TOKENIZER (Expanded Dictionary) ---
         
         const MANUAL_SPLITS = {
             "คิดถึง": ["คิด", "ถึง"], "หัวใจ": ["หัว", "ใจ"], "เสียใจ": ["เสีย", "ใจ"], "ดีใจ": ["ดี", "ใจ"],
@@ -392,6 +398,7 @@
                     return;
                 }
 
+                // Akson Nam + Mai Han Akat (C1 C2 ั C3)
                 if (word.length === 4 && word.charAt(2) === 'ั') {
                     const c1 = word.charAt(0);
                     const c2 = word.charAt(1);
@@ -442,8 +449,6 @@
             ['L', 'L', 'K', 'L', 'K', 'K']      
         ];
 
-        let summaryData = "";
-
         function analyzePoem() {
             const input = document.getElementById('poemInput').value;
             if(!input.trim()) return alert("กรุณาวางบทประพันธ์ก่อนครับ");
@@ -483,15 +488,16 @@
                 extraWordsMap.push(extraWords);
             }
 
+            // --- Rhyme Names ---
             let rhymePairs = [
-                { from: [0, 4], to: [1, 2], name: 'สัมผัสระหว่างวรรค (บท 1)' },
-                { from: [1, 5], to: [2, 4], name: 'สัมผัสระหว่างบาท (บท 1)' }
+                { from: [0, 4], to: [1, 2], name: 'สัมผัสระหว่างวรรค (บท 1 วรรค 1 เชื่อมไปวรรค 2)' },
+                { from: [1, 5], to: [2, 4], name: 'สัมผัสระหว่างบาท (บท 1 วรรค 2 เชื่อมไปวรรค 3)' }
             ];
             if (mode === 2) {
                 rhymePairs.push(
-                    { from: [3, 5], to: [5, 5], name: 'สัมผัสระหว่างบท' },
-                    { from: [4, 4], to: [5, 2], name: 'สัมผัสระหว่างวรรค (บท 2)' },
-                    { from: [5, 5], to: [6, 4], name: 'สัมผัสระหว่างบาท (บท 2)' }
+                    { from: [3, 5], to: [5, 5], name: 'สัมผัสระหว่างบท (บท 1 วรรค 4 เชื่อมไป บท 2 วรรค 2)' },
+                    { from: [4, 4], to: [5, 2], name: 'สัมผัสระหว่างวรรค (บท 2 วรรค 1 เชื่อมไปวรรค 2)' },
+                    { from: [5, 5], to: [6, 4], name: 'สัมผัสระหว่างบาท (บท 2 วรรค 2 เชื่อมไปวรรค 3)' }
                 );
             }
 
@@ -515,6 +521,9 @@
             let samphusPassCount = 0;
             let samphusFailCount = 0;
             
+            // เก็บรายละเอียดข้อผิดพลาด
+            let errorDetailsList = []; 
+            
             poem.forEach((verse, vIndex) => {
                 const verseDiv = document.createElement('div');
                 verseDiv.className = "flex flex-col md:flex-row md:items-center mb-6 border-b border-gray-100 pb-4";
@@ -535,6 +544,7 @@
                          box.className = "syllable-box empty-box";
                          box.innerHTML = `<span class="text-sm font-bold">ขาด</span>`;
                          missingWordCount++;
+                         errorDetailsList.push(`- วรรคที่ ${vIndex + 1} คำที่ ${wIndex + 1}: คำขาด`);
                     } else {
                         const isLahuWord = isLahu(word);
                         const actual = isLahuWord ? 'L' : 'K';
@@ -547,6 +557,8 @@
                             box.className = `syllable-box bg-white border-2 border-red-500 text-red-600`;
                             isError = true;
                             errorKruLahuCount++;
+                            const reqType = expected === 'K' ? 'ครุ' : 'ลหุ';
+                            errorDetailsList.push(`- วรรคที่ ${vIndex + 1} คำที่ ${wIndex + 1} "${word}": ผิด (ต้องเป็น${reqType})`);
                         }
 
                         const fixLabel = expected === 'K' ? 'แก้เป็นครุ' : 'แก้เป็นลหุ';
@@ -573,6 +585,7 @@
                         extraContainer.appendChild(sp);
                     });
                     contentContainer.appendChild(extraContainer);
+                    errorDetailsList.push(`- วรรคที่ ${vIndex + 1}: มีคำเกินจำนวน ${extras.length} คำ (${extras.join(', ')})`);
                 }
                 
                 verseDiv.appendChild(contentContainer);
@@ -601,7 +614,7 @@
                             <span class="text-xs font-bold mr-2 border border-green-200 px-1 rounded text-green-600">${pair.name}</span>
                             <span><b>${w1}</b> - <b>${w2}</b></span>
                         </div>`;
-                        rhymeSummaryText += `   - ${pair.name}: ผ่าน (${w1}-${w2})\n`;
+                        rhymeSummaryText += `   ✓ ${pair.name}: ผ่าน (${w1}-${w2})\n`;
                     } else {
                         samphusFailCount++;
                         rhymeHTML += `<div class="flex items-center text-red-700 bg-red-50 p-2 rounded-lg border border-red-100 mb-1">
@@ -609,13 +622,13 @@
                              <span class="text-xs font-bold mr-2 border border-red-200 px-1 rounded text-red-500">${pair.name}</span>
                             <span><b>${w1}</b> - <b>${w2}</b></span>
                         </div>`;
-                        rhymeSummaryText += `   - ${pair.name}: ไม่ผ่าน (${w1}-${w2})\n`;
+                        rhymeSummaryText += `   ✖ ${pair.name}: ไม่ผ่าน (${w1}-${w2})\n`;
                     }
                 } else {
                     rhymeHTML += `<div class="flex items-center text-gray-400 p-2 text-sm mb-1">
                         <span class="mr-2">⚪</span> ${pair.name}: ข้อมูลไม่ครบ
                     </div>`;
-                    rhymeSummaryText += `   - ${pair.name}: ตรวจสอบไม่ได้ (คำไม่ครบ)\n`;
+                    rhymeSummaryText += `   ○ ${pair.name}: ตรวจสอบไม่ได้ (คำไม่ครบ)\n`;
                 }
             });
             samphusSummary.innerHTML = rhymeHTML;
@@ -644,6 +657,12 @@
             let finalSummary = "สรุปผลการตรวจสอบอินทรวิเชียรฉันท์ ๑๑\n";
             finalSummary += "--------------------------------\n";
             finalSummary += `[${errorKruLahuCount===0 ? '/' : ' '}] ผังบังคับ (ครุ-ลหุ): ${errorKruLahuCount===0 ? 'ถูกต้อง' : 'พบข้อผิดพลาด ' + errorKruLahuCount + ' จุด'}\n`;
+            
+            if (errorDetailsList.length > 0) {
+                finalSummary += "รายละเอียดข้อผิดพลาด:\n";
+                finalSummary += errorDetailsList.join("\n") + "\n";
+            }
+
             finalSummary += `[${(missingWordCount===0 && extraWordCount===0) ? '/' : ' '}] จำนวนคำ: ${wordStatusText}\n`;
             finalSummary += `[${samphusFailCount===0 ? '/' : ' '}] สัมผัสบังคับ: ${samphusFailCount===0 ? 'ถูกต้องทั้งหมด' : 'พบจุดผิด ' + samphusFailCount + ' จุด'}\n`;
             finalSummary += rhymeSummaryText;
