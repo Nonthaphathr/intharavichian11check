@@ -3,63 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบตรวจทานอินทรวิเชียรฉันท์ ๑๑ V.1.0</title>
+    <title>ระบบตรวจทานอินทรวิเชียรฉันท์ ๑๑ (Syllable Edition)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Prompt', 'Sarabun', sans-serif; background-color: #f3f4f6; }
-        .kru { background-color: #3b82f6; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; }
-        .lahu { background-color: #ef4444; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; }
-        .correct-mark { color: #22c55e; margin-left: 4px; }
-        .error-mark { color: #ef4444; text-decoration: underline wavy #ef4444; }
-        .syllable-box { display: inline-block; margin: 2px; text-align: center; }
-        .rhyme-line { stroke: #f59e0b; stroke-width: 2; fill: none; }
+        body { font-family: 'Prompt', 'Sarabun', sans-serif; background-color: #f8f9fa; }
+        .kru-bg { background-color: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; } /* สีฟ้าจางๆ แบบในรูป */
+        .lahu-bg { background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; } /* สีแดงจางๆ แบบในรูป */
+        .syllable-box { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center;
+            width: 60px; 
+            height: 65px; 
+            margin: 4px; 
+            border-radius: 8px;
+            position: relative;
+            transition: all 0.2s;
+        }
+        .syllable-word { font-size: 1.1rem; font-weight: 600; margin-bottom: 2px; }
+        .syllable-type { font-size: 0.7rem; opacity: 0.8; }
+        .error-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #ef4444;
+            color: white;
+            font-size: 0.6rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+        .logo-shadow { filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
     </style>
 </head>
-<body class="p-6">
+<body class="min-h-screen flex flex-col">
 
-    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
-        <div class="bg-blue-600 p-6 text-white text-center">
-            <h1 class="text-2xl font-bold mb-2">ระบบตรวจทานอินทรวิเชียรฉันท์ ๑๑</h1>
-            <p class="text-blue-100">วางบทประพันธ์ที่คัดลอกมา เพื่อตรวจสอบความถูกต้องของฉันทลักษณ์และสัมผัส</p>
+    <div class="container max-w-4xl mx-auto p-4 flex-grow">
+        
+        <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 text-center border border-gray-100 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-400 to-blue-600"></div>
+            
+            <div class="flex flex-col md:flex-row items-center justify-center gap-6 mb-4">
+                <img src="https://img5.pic.in.th/file/secure-sv1/logo-vichakarngo-6.png" alt="Logo" class="w-32 h-auto rounded-lg logo-shadow object-contain">
+                <div class="text-left">
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-800">ระบบตรวจทานอินทรวิเชียรฉันท์ ๑๑</h1>
+                    <p class="text-gray-500 mt-1">ตรวจสอบความถูกต้องของฉันทลักษณ์ (ครุ-ลหุ) และการสัมผัส</p>
+                    <div class="mt-2 inline-block bg-blue-50 text-blue-600 text-xs px-3 py-1 rounded-full border border-blue-100">
+                        พัฒนาโดย ครูนนทพัทธ์ หิรัญเรือง
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="p-6">
-            <div class="mb-6">
-                <label class="block text-gray-700 text-sm font-bold mb-2">วางบทประพันธ์ที่นี่ (2 บท):</label>
-                <textarea id="poemInput" rows="5" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-lg" placeholder="วางข้อความที่คัดลอกมา เช่น...&#10;วิชาเหมือนสินค้า อันมีค่าอยู่เมืองไกล&#10;ต้องยากลำบากไป จึงจะได้สินค้ามา"></textarea>
-                <button onclick="analyzePoem()" class="mt-4 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded transition duration-200 flex justify-center items-center gap-2">
-                    <span>🔍 ตรวจสอบความถูกต้อง</span>
+        <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-100">
+            <label class="block text-gray-700 font-bold mb-2 flex items-center gap-2">
+                <span>✍️ วางบทประพันธ์ (1 หรือ 2 บท)</span>
+                <span class="text-xs font-normal text-gray-400">*ระบบจะพยายามแยกพยางค์ให้อัตโนมัติ (เช่น ชีวิต -> ชี, วิต)</span>
+            </label>
+            <textarea id="poemInput" rows="5" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition" placeholder="วางบทประพันธ์ที่นี่...&#10;วิชาเหมือนสินค้า อันมีค่าอยู่เมืองไกล&#10;ต้องยากลำบากไป จึงจะได้สินค้ามา"></textarea>
+            
+            <div class="flex justify-end mt-4">
+                <button onclick="analyzePoem()" class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-2 px-6 rounded-xl shadow-md transition transform hover:-translate-y-0.5 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                    ตรวจสอบผลงาน
                 </button>
             </div>
+        </div>
 
-            <hr class="border-gray-200 my-6">
-
-            <div id="resultArea" class="hidden">
-                <h3 class="text-xl font-bold text-gray-800 mb-4 border-l-4 border-blue-500 pl-3">ผลการวิเคราะห์</h3>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <div id="kruLahuScore" class="bg-gray-50 p-4 rounded-lg border"></div>
-                    <div id="samphusScore" class="bg-gray-50 p-4 rounded-lg border"></div>
+        <div id="resultArea" class="hidden animate-fade-in-up">
+            <div class="flex items-center gap-2 mb-4">
+                <div class="w-1 h-8 bg-blue-600 rounded-full"></div>
+                <h3 class="text-xl font-bold text-gray-800">ผลการวิเคราะห์</h3>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
+                    <h4 class="font-bold text-gray-700 mb-2">ผังบังคับ (ครุ-ลหุ)</h4>
+                    <div id="kruLahuSummary"></div>
                 </div>
 
-                <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
-                    <div id="visualResult" class="space-y-4 text-lg leading-loose font-medium text-gray-700"></div>
+                <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
+                    <h4 class="font-bold text-gray-700 mb-2">สัมผัสบังคับ</h4>
+                    <div id="samphusSummary" class="text-sm space-y-2"></div>
                 </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm overflow-x-auto">
+                <div id="visualResult" class="space-y-6 min-w-[600px]"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- 1. CORE LOGIC FROM YOUR ORIGINAL CODE ---
-        // (ฟังก์ชันตรวจสอบสระ, ตัวสะกด, ครุ-ลหุ ที่ดึงมาจากโค้ดเดิมของคุณ)
+        // --- CORE LOGIC (Rules & Checking) ---
 
         function getVowelAndFinalSound(word) {
             if (!word) return { vowel: '', finalGroup: '' };
             const cleanWord = word.replace(/[่้๊๋์]/g, '');
             const processedWord = processLeadingConsonants(cleanWord);
 
-            // Ror Han Logic (Original)
+            // Ror Han
             if (/รร[ถตษสศดจชฎฏฐฑฒทธ]$/.test(processedWord)) return { vowel: 'อะ', finalGroup: 'กด' };
             if (/รร[คกขฆ]$/.test(processedWord)) return { vowel: 'อะ', finalGroup: 'กก' };
             if (/รร[พภบปฟ]$/.test(processedWord)) return { vowel: 'อะ', finalGroup: 'กบ' };
@@ -76,8 +125,8 @@
 
         function processLeadingConsonants(word) {
             const anamYWords = ['อย่า', 'อยู่', 'อย่าง', 'อยาก'];
-            for (let anamWord of anamYWords) {
-                if (word.startsWith(anamWord.replace(/[่้๊๋์]/g, ''))) return 'ย' + word.substring(2);
+            for (let w of anamYWords) {
+                if (word.startsWith(w.replace(/[่้๊๋์]/g, ''))) return 'ย' + word.substring(2);
             }
             if (word.length >= 2 && word.charAt(0) === 'ห') {
                 const secondChar = word.charAt(1);
@@ -89,8 +138,8 @@
         function hasAiVowel(word) {
             if (word.includes('ไ') || word.includes('ใ') || word.includes('ัย')) return true;
             const specialAiWords = ['วัย', 'ชัย', 'ภัย', 'ไทย', 'อัย', 'ขัย', 'นัย', 'ลัย', 'สัย', 'ปัจจัย', 'อาศัย', 'วิสัย', 'ปรนัย', 'อุปัย', 'วิธัย'];
-            for (let specialWord of specialAiWords) {
-                if (word === specialWord || word.endsWith(specialWord)) return true;
+            for (let w of specialAiWords) {
+                if (word === w || word.endsWith(w)) return true;
             }
             return false;
         }
@@ -109,17 +158,13 @@
         }
 
         function getVowelSound(word) {
-            // Simplified for brevity, prioritizing main logic
             if (hasAiVowel(word)) return 'ไอ';
             if (word.includes('อำ') || word.includes('ำ')) return 'อำ';
-            // ... (Includes shortened logic for other vowels if needed)
-            
-            // Check short vowels explicitly
             const shortVowels = ['ะ', 'ิ', 'ึ', 'ุ', '็', 'ั'];
             for(let v of shortVowels) {
-                 if(word.includes(v)) return 'อะ'; // Treat as short sound group
+                 if(word.includes(v)) return 'อะ'; 
             }
-            return 'อา'; // Default to long for simplicity in this context if not caught
+            return 'อา'; 
         }
 
         function isLahu(word) {
@@ -128,13 +173,12 @@
             const cleanWord = word.replace(/[่้๊๋์]/g, '');
             const processedWord = processLeadingConsonants(cleanWord);
             
-            const specialLahu = ["ก็", "บ่", "ณ", "ธ"];
+            const specialLahu = ["ก็", "บ่", "ณ", "ธ", "จะ", "ทิ", "ปิ", "ยะ", "สิ", "ธุ", "ระ", "พะ"];
             if (specialLahu.includes(word)) return true;
 
             if (processedWord.includes("อำ") || processedWord.includes("ไอ") || processedWord.includes("ใอ") || processedWord.includes("เอา")) return false;
             if (hasEndingConsonant(word)) return false;
 
-            // Short vowel check logic
             const forceKruLongVowels = ["า", "ี", "ื", "ู", "เ", "แ", "โ", "อ"];
             const shorteners = ["ะ", "็"];
             
@@ -147,8 +191,7 @@
                 if (processedWord.includes("เอาะ") || processedWord.includes("เออะ") || processedWord.includes("อัวะ") || processedWord.includes("เอียะ")) isShortened = true;
                 if (!isShortened) return false;
             }
-            
-            return true; // If passed all Kru checks, assume Lahu (simplified for validator)
+            return true; 
         }
 
         function hasEndingConsonant(word) {
@@ -171,169 +214,221 @@
             return sound1.vowel === sound2.vowel && sound1.finalGroup === sound2.finalGroup;
         }
 
-        // --- 2. VALIDATOR LOGIC ---
+        // --- NEW: TOKENIZER (Syllable Splitter) ---
+        function tokenizeThaiSyllables(text) {
+            // 1. Basic segment using browser API
+            const segmenter = new Intl.Segmenter('th', { granularity: 'word' });
+            const segments = Array.from(segmenter.segment(text)).filter(s => s.isWordLike).map(s => s.segment.trim());
 
-        const PATTERN = [
-            // Verse 1 (5 words)
-            ['K', 'K', 'L', 'K', 'K'],
-            // Verse 2 (6 words)
-            ['L', 'L', 'K', 'L', 'K', 'K'],
-            // Verse 3 (5 words)
-            ['K', 'K', 'L', 'K', 'K'],
-            // Verse 4 (6 words)
-            ['L', 'L', 'K', 'L', 'K', 'K'],
-            // Verse 5 (5 words) - Stanza 2
-            ['K', 'K', 'L', 'K', 'K'],
-            // Verse 6 (6 words)
-            ['L', 'L', 'K', 'L', 'K', 'K'],
-            // Verse 7 (5 words)
-            ['K', 'K', 'L', 'K', 'K'],
-            // Verse 8 (6 words)
-            ['L', 'L', 'K', 'L', 'K', 'K']
-        ];
+            // 2. Post-process to split syllables (Heuristics)
+            let refinedSegments = [];
+            segments.forEach(word => {
+                // If user manually spaced, it's already split.
+                // We try to split specific patterns if they are clumped together.
+                
+                // Case: Explicit 2-syllable words that Intl.Segmenter might group
+                // E.g. "ปิยะ", "กะทิ", "ธุระ" (Pattern: Consonant+ShortVowel + Consonant+ShortVowel)
+                // Or "ชีวิต" (Pattern: Consonant+LongVowel + Consonant+ShortVowel+Final) - harder to regex
+                
+                // Simple Patch: Check known common multi-syllable Lahu words or simple structures
+                if (word.length > 2) {
+                    // Try to split "Piy a" -> ปิ ยะ
+                    if (word.match(/^[ก-ฮ][ิุ][ก-ฮ]ะ$/)) { 
+                        refinedSegments.push(word.substring(0,2));
+                        refinedSegments.push(word.substring(2));
+                        return;
+                    }
+                    // Try to split "Chi Wit" -> ชี วิต (Consonant+Sara Ee + ...)
+                    if (word.match(/^[ก-ฮ]ี[ก-ฮ][ิ][ก-ฮ]$/)) { // e.g. ชีวิต
+                         refinedSegments.push(word.substring(0,2));
+                         refinedSegments.push(word.substring(2));
+                         return;
+                    }
+                }
+                
+                // If no special rule, push original
+                refinedSegments.push(word);
+            });
 
-        // Rhyme Map: [VerseIndex, WordIndex] (0-based)
-        const RHYME_PAIRS = [
-            { from: [0, 4], to: [1, 2], name: 'สัมผัสระหว่างวรรค (บท 1)' },
-            { from: [1, 5], to: [2, 4], name: 'สัมผัสระหว่างบาท (บท 1)' },
-            { from: [3, 5], to: [5, 5], name: 'สัมผัสระหว่างบท' }, // Cross stanza
-            { from: [4, 4], to: [5, 2], name: 'สัมผัสระหว่างวรรค (บท 2)' },
-            { from: [5, 5], to: [6, 4], name: 'สัมผัสระหว่างบาท (บท 2)' }
+            return refinedSegments;
+        }
+
+        // --- VALIDATOR LOGIC ---
+
+        const PATTERN_STANZA = [
+            ['K', 'K', 'L', 'K', 'K'],          // Verse 1
+            ['L', 'L', 'K', 'L', 'K', 'K'],     // Verse 2
+            ['K', 'K', 'L', 'K', 'K'],          // Verse 3
+            ['L', 'L', 'K', 'L', 'K', 'K']      // Verse 4
         ];
 
         function analyzePoem() {
             const input = document.getElementById('poemInput').value.trim();
             if(!input) return alert("กรุณาวางบทประพันธ์ก่อนครับ");
 
-            // 1. Split Text into Lines
-            let lines = input.split(/\r?\n/).filter(line => line.trim() !== '');
+            // 1. Clean and Tokenize
+            // Remove special chars but keep Thai and spaces
+            let cleanText = input.replace(/[^\u0E00-\u0E7F\s]/g, " "); 
+            let syllables = tokenizeThaiSyllables(cleanText);
 
-            // 2. Segment Words (Using Browser's Intl.Segmenter)
-            const segmenter = new Intl.Segmenter('th', { granularity: 'word' });
-            let segmentedVerses = [];
+            // 2. Determine Mode (1 Stanza or 2 Stanzas)
+            const count = syllables.length;
+            let mode = 1; 
+            if (count > 30) mode = 2; // Threshold: if > 30 syllables, assume 2 stanzas (target 44)
 
-            // Simple heuristic to grouping words into verses
-            // Assume user enters line by line matching structure or continuous text
-            // For robustness, we flatten all words and then chunks them according to pattern (5, 6, 5, 6...)
-            let allWords = [];
-            lines.forEach(line => {
-                const iterator = segmenter.segment(line);
-                for (let { segment, isWordLike } of iterator) {
-                    if (isWordLike) allWords.push(segment.trim());
-                }
-            });
-
-            // 3. Map Words to Pattern Structure
-            let structuredPoem = [];
-            let wordIndex = 0;
-            let currentVerseWords = [];
-            
-            // Expected structure length
-            const totalRequiredWords = 44; // (5+6+5+6) * 2
-
-            if(allWords.length < totalRequiredWords) {
-                alert(`จำนวนคำไม่ครบ หรือการตัดคำผิดพลาด (พบ ${allWords.length} คำ จากที่ต้องการ ${totalRequiredWords} คำ) กรุณาตรวจสอบการเว้นวรรค`);
+            // 3. Setup Pattern based on mode
+            let currentPattern = [];
+            if (mode === 1) {
+                currentPattern = [...PATTERN_STANZA];
+            } else {
+                currentPattern = [...PATTERN_STANZA, ...PATTERN_STANZA]; // Duplicate for 2nd stanza
             }
 
-            for(let i=0; i < PATTERN.length; i++) {
-                let requiredCount = PATTERN[i].length;
+            // 4. Map Syllables to Structure
+            let structuredPoem = [];
+            let wordIndex = 0;
+            
+            for(let i=0; i < currentPattern.length; i++) {
+                let versePattern = currentPattern[i];
                 let verseWords = [];
-                for(let j=0; j < requiredCount; j++) {
-                    if(wordIndex < allWords.length) {
-                        verseWords.push(allWords[wordIndex]);
+                for(let j=0; j < versePattern.length; j++) {
+                    if(wordIndex < syllables.length) {
+                        verseWords.push(syllables[wordIndex]);
                         wordIndex++;
                     } else {
-                        verseWords.push("?"); // Missing
+                        verseWords.push("?"); 
                     }
                 }
                 structuredPoem.push(verseWords);
             }
 
-            renderResult(structuredPoem);
+            // 5. Define Rhyme Pairs based on mode
+            let rhymePairs = [
+                { from: [0, 4], to: [1, 2], name: 'สัมผัสระหว่างวรรค (บท 1)' },
+                { from: [1, 5], to: [2, 4], name: 'สัมผัสระหว่างบาท (บท 1)' }
+            ];
+
+            if (mode === 2) {
+                rhymePairs.push(
+                    { from: [3, 5], to: [5, 5], name: 'สัมผัสระหว่างบท' },
+                    { from: [4, 4], to: [5, 2], name: 'สัมผัสระหว่างวรรค (บท 2)' },
+                    { from: [5, 5], to: [6, 4], name: 'สัมผัสระหว่างบาท (บท 2)' }
+                );
+            }
+
+            renderResult(structuredPoem, currentPattern, rhymePairs, mode);
         }
 
-        function renderResult(poem) {
-            const visualDiv = document.getElementById('visualResult');
+        function renderResult(poem, pattern, rhymePairs, mode) {
             const resultArea = document.getElementById('resultArea');
-            const kruLahuScore = document.getElementById('kruLahuScore');
-            const samphusScore = document.getElementById('samphusScore');
+            const visualDiv = document.getElementById('visualResult');
+            const kruLahuSummary = document.getElementById('kruLahuSummary');
+            const samphusSummary = document.getElementById('samphusSummary');
             
             visualDiv.innerHTML = '';
             resultArea.classList.remove('hidden');
 
             let errorCount = 0;
-            let samphusErrors = [];
+            let samphusPassCount = 0;
+            let samphusFailCount = 0;
 
-            // 1. Render Syllables & Check Kru/Lahu
+            // 1. Render Syllable Boxes
             poem.forEach((verse, vIndex) => {
                 const verseDiv = document.createElement('div');
-                verseDiv.className = "flex flex-wrap items-center gap-2 border-b border-gray-100 pb-2";
+                verseDiv.className = "flex items-center mb-4";
                 
-                // Add Verse Label
-                const label = document.createElement('span');
-                label.className = "text-xs text-gray-400 w-16";
+                // Label
+                const label = document.createElement('div');
+                label.className = "w-20 text-xs text-gray-400 font-bold uppercase tracking-wider";
                 label.innerText = `วรรค ${vIndex + 1}`;
                 verseDiv.appendChild(label);
 
+                // Words Container
+                const wordsContainer = document.createElement('div');
+                wordsContainer.className = "flex flex-wrap gap-2";
+
                 verse.forEach((word, wIndex) => {
-                    const expected = PATTERN[vIndex][wIndex]; // 'K' or 'L'
+                    const expected = pattern[vIndex][wIndex]; 
                     const isLahuWord = isLahu(word);
                     const actual = isLahuWord ? 'L' : 'K';
                     
-                    const span = document.createElement('span');
-                    span.className = `syllable-box px-3 py-1 rounded relative ${actual === 'K' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}`;
+                    const box = document.createElement('div');
                     
-                    let statusIcon = '';
+                    // Style logic
+                    let bgClass = actual === 'K' ? 'kru-bg' : 'lahu-bg';
+                    let isError = false;
+
                     if(word === '?') {
-                         span.className = "bg-gray-200 text-gray-500 px-3 py-1";
-                         word = "[ว่าง]";
+                         box.className = "syllable-box bg-gray-100 text-gray-400 border border-gray-200";
+                         word = "ว่าง";
                     } else if (expected === actual) {
-                        span.classList.add('border', expected === 'K' ? 'border-blue-300' : 'border-red-300');
+                        box.className = `syllable-box ${bgClass}`;
                     } else {
-                        span.classList.add('border-2', 'border-red-600', 'line-through', 'decoration-red-500');
-                        statusIcon = `<span class="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] px-1 rounded-full">แก้</span>`;
+                        // Error State
+                        box.className = `syllable-box bg-white border-2 border-red-500 text-red-600`;
+                        isError = true;
                         errorCount++;
                     }
 
-                    span.innerHTML = `${word} <span class="text-[10px] opacity-50 block">${actual==='K'?'ครุ':'ลหุ'}</span>${statusIcon}`;
-                    span.id = `w-${vIndex}-${wIndex}`; // Assign ID for line drawing later (if needed)
-                    verseDiv.appendChild(span);
+                    box.innerHTML = `
+                        <span class="syllable-word">${word}</span>
+                        <span class="syllable-type">${actual==='K'?'ครุ':'ลหุ'}</span>
+                        ${isError ? '<span class="error-badge">แก้</span>' : ''}
+                    `;
+                    wordsContainer.appendChild(box);
                 });
+                
+                verseDiv.appendChild(wordsContainer);
                 visualDiv.appendChild(verseDiv);
+
+                // Add separator if 2 stanzas mode
+                if (mode === 2 && vIndex === 3) {
+                    const sep = document.createElement('div');
+                    sep.className = "border-b border-dashed border-gray-300 my-4 mx-10";
+                    visualDiv.appendChild(sep);
+                }
             });
 
-            // 2. Check Samphus
-            let samphusPass = 0;
-            let samphusHTML = '<ul class="text-sm space-y-2">';
-            
-            RHYME_PAIRS.forEach(pair => {
+            // 2. Check Rhymes
+            let rhymeHTML = '';
+            rhymePairs.forEach(pair => {
                 const w1 = poem[pair.from[0]]?.[pair.from[1]];
                 const w2 = poem[pair.to[0]]?.[pair.to[1]];
 
                 if(w1 && w2 && w1 !== '?' && w2 !== '?') {
                     const isRhyme = checkSamphus(w1, w2);
                     if(isRhyme) {
-                        samphusPass++;
-                        samphusHTML += `<li class="text-green-600">✅ ${pair.name}: <b>${w1}</b> - <b>${w2}</b> (สัมผัส)</li>`;
+                        samphusPassCount++;
+                        rhymeHTML += `<div class="flex items-center text-green-700 bg-green-50 p-2 rounded-lg border border-green-100">
+                            <span class="mr-2">✅</span> 
+                            <span class="text-xs font-bold mr-2 border border-green-200 px-1 rounded text-green-600">${pair.name}</span>
+                            <span><b>${w1}</b> - <b>${w2}</b> (สัมผัส)</span>
+                        </div>`;
                     } else {
-                        samphusHTML += `<li class="text-red-600">❌ ${pair.name}: <b>${w1}</b> - <b>${w2}</b> (ไม่สัมผัส)</li>`;
-                        samphusErrors.push(pair.name);
+                        samphusFailCount++;
+                        rhymeHTML += `<div class="flex items-center text-red-700 bg-red-50 p-2 rounded-lg border border-red-100">
+                            <span class="mr-2">❌</span> 
+                             <span class="text-xs font-bold mr-2 border border-red-200 px-1 rounded text-red-500">${pair.name}</span>
+                            <span><b>${w1}</b> - <b>${w2}</b> (ไม่สัมผัส)</span>
+                        </div>`;
                     }
                 } else {
-                    samphusHTML += `<li class="text-gray-400">⚪ ${pair.name}: ข้อมูลไม่ครบ</li>`;
+                    rhymeHTML += `<div class="flex items-center text-gray-400 p-2 text-sm">
+                        <span class="mr-2">⚪</span> ${pair.name}: ข้อมูลไม่ครบ
+                    </div>`;
                 }
             });
-            samphusHTML += '</ul>';
+            samphusSummary.innerHTML = rhymeHTML;
 
-            // 3. Update Summary Boards
-            kruLahuScore.innerHTML = `<h4 class="font-bold text-gray-700">ผังบังคับ (ครุ-ลหุ)</h4>
-                                      <p class="text-3xl font-bold ${errorCount === 0 ? 'text-green-500' : 'text-red-500'}">
-                                        ${errorCount === 0 ? 'ผ่านฉลุย!' : 'พบ ' + errorCount + ' จุดต้องแก้ไข'}
-                                      </p>`;
-            
-            samphusScore.innerHTML = `<h4 class="font-bold text-gray-700">สัมผัสบังคับ</h4>
-                                      ${samphusHTML}`;
+            // 3. Update Summary Text
+            if (errorCount === 0) {
+                kruLahuSummary.innerHTML = `<h2 class="text-3xl font-bold text-green-500">เยี่ยมมาก! ไม่พบจุดผิด</h2><p class="text-gray-500 text-sm">ผังครุ-ลหุถูกต้องทั้งหมด (${mode} บท)</p>`;
+            } else {
+                kruLahuSummary.innerHTML = `<h2 class="text-3xl font-bold text-red-500">พบ ${errorCount} จุดต้องแก้ไข</h2><p class="text-gray-500 text-sm">ลองตรวจสอบคำที่ขึ้นสัญลักษณ์ "แก้"</p>`;
+            }
 
+            // Scroll to result
+            resultArea.scrollIntoView({ behavior: 'smooth' });
         }
     </script>
 </body>
