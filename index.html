@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบตรวจทานอินทรวิเชียรฉันท์ ๑๑ (V2.9 Detailed Fixes)</title>
+    <title>ระบบตรวจทานอินทรวิเชียรฉันท์ ๑๑ (V2.9.1 Fix Sara Aw)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -15,7 +15,7 @@
             flex-direction: column; 
             align-items: center; 
             justify-content: center;
-            width: 65px; /* ขยายความกว้างเล็กน้อย */
+            width: 65px; 
             height: 70px; 
             margin: 6px; 
             border-radius: 8px;
@@ -34,7 +34,7 @@
         .badge {
             position: absolute;
             top: -8px;
-            right: -15px; /* ขยับขวาเพื่อให้ข้อความยาวๆ ไม่บังคำ */
+            right: -15px; 
             color: white;
             font-size: 0.55rem;
             padding: 2px 6px;
@@ -42,7 +42,7 @@
             font-weight: bold;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             z-index: 10;
-            white-space: nowrap; /* ห้ามตัดบรรทัด */
+            white-space: nowrap; 
             width: max-content;
         }
         .badge-error { background-color: #ef4444; }
@@ -101,7 +101,7 @@
         <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-100">
             <label class="block text-gray-700 font-bold mb-2 flex flex-col md:flex-row md:items-center justify-between gap-2">
                 <span class="flex items-center gap-2 text-lg">📝 วางบทประพันธ์ (แยกบรรทัดให้ชัดเจน)</span>
-                <span class="text-xs font-normal text-gray-500 bg-gray-100 px-3 py-1 rounded-full">V2.9 (แก้สระเอาะ / ป้ายเตือนละเอียด)</span>
+                <span class="text-xs font-normal text-gray-500 bg-gray-100 px-3 py-1 rounded-full">V2.9.1 (แก้สระเอาะสมบูรณ์)</span>
             </label>
             
             <textarea id="poemInput" rows="6" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition placeholder-gray-400 font-medium" placeholder="วางอินทรวิเชียรฉันท์ ๑๑ ของท่านทีนี่
@@ -251,7 +251,7 @@
             return false;
         }
 
-        // --- ⭐ V2.9: Corrected isLahu (Check 'เอาะ' first) ⭐ ---
+        // --- ⭐ isLahu FIXED (Check endsWith 'ะ' BEFORE Sara Ao) ⭐ ---
         function isLahu(word) {
             if (!word) return false;
             word = word.trim();
@@ -262,8 +262,9 @@
             const specialLahu = ["ก็", "บ่", "ณ", "ธ", "จะ", "ทิ", "ปิ", "ยะ", "สิ", "ธุ", "ระ", "พะ", "มิ", "ดุ", "เตะ", "กะ", "นิ", "ผลิ", "ลุ", "ฤ", "อิ", "ติ", "อุ"];
             if (specialLahu.includes(word)) return true;
 
-            // 2. สระเอาะ (เ-าะ) -> ลหุ (ต้องเช็คก่อนสระเอา)
-            if (processedWord.includes("เอาะ")) return true;
+            // 2. ⭐ FIX: ถ้าลงท้ายด้วยสระ 'ะ' (เช่น เพราะ, เกาะ, และ, กะ, เ-าะ) -> ลหุ
+            // ต้องเช็คอันนี้ *ก่อน* เช็คสระเอา (เ...า) เพราะคำว่า "เพราะ" มีทั้ง เ และ า
+            if (processedWord.endsWith("ะ")) return true;
 
             // 3. สระเกิน (อำ, ไอ, ใอ, เอา) -> ครุ
             if (processedWord.includes("ำ") || processedWord.includes("ไ") || processedWord.includes("ใ")) return false; 
@@ -295,7 +296,7 @@
             return sound1.vowel === sound2.vowel && sound1.finalGroup === sound2.finalGroup;
         }
 
-        // --- 2. TOKENIZER (Standard) ---
+        // --- 2. TOKENIZER ---
         
         const MANUAL_SPLITS = {
             "คิดถึง": ["คิด", "ถึง"], "หัวใจ": ["หัว", "ใจ"], "เสียใจ": ["เสีย", "ใจ"], "ดีใจ": ["ดี", "ใจ"],
@@ -352,7 +353,6 @@
                     return;
                 }
 
-                // Check for Akson Nam pattern C1 C2 ั C3
                 if (word.length === 4 && word.charAt(2) === 'ั') {
                     const c1 = word.charAt(0);
                     const c2 = word.charAt(1);
@@ -510,7 +510,6 @@
                             errorKruLahuCount++;
                         }
 
-                        // --- ⭐ Detailed Fix Label ⭐ ---
                         const fixLabel = expected === 'K' ? 'แก้เป็นครุ' : 'แก้เป็นลหุ';
 
                         box.innerHTML = `
@@ -602,7 +601,7 @@
             }
             wordCountSummary.innerHTML = wordStatusHTML;
 
-            // --- Generate Summary Text ---
+            // --- Generate Final Summary Text ---
             let finalSummary = "สรุปผลการตรวจสอบอินทรวิเชียรฉันท์ ๑๑\n";
             finalSummary += "--------------------------------\n";
             finalSummary += `[${errorKruLahuCount===0 ? '/' : ' '}] ผังบังคับ (ครุ-ลหุ): ${errorKruLahuCount===0 ? 'ถูกต้อง' : 'พบข้อผิดพลาด ' + errorKruLahuCount + ' จุด'}\n`;
